@@ -2,7 +2,7 @@
 
 public enum Roles
 {
-    Patient,
-    Doctor,
-    Administrator
+    Patient = 0,
+    Doctor = 1,
+    Administrator = 2
 }
