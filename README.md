@@ -57,7 +57,7 @@ Example:
 From the solution root directory, run the following command to create the database and apply all existing migrations:
 
 ```bash
-dotnet ef database update --project ProfilesApi.Infrastructure --startup-project ProfilesApi
+dotnet ef database update --project ProfilesApi.Infrastructure --startup-project ProfilesApi.API
 ```
 
 ### 4. Build and Run the Application
@@ -65,7 +65,8 @@ dotnet ef database update --project ProfilesApi.Infrastructure --startup-project
 You can start the application from the terminal:
 
 ```bash
-dotnet run --project ProfilesApi
+cd ProfilesApi
+dotnet run --project ProfilesApi.API
 ```
 
 ### 5. Explore the API
