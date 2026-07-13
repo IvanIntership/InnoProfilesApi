@@ -16,8 +16,12 @@ public class Doctor : SoftDeletableEntity
         get
         {
             var totalMonth = ((DateTime.UtcNow.Year - CareerStartDate.Year) * 12) + DateTime.UtcNow.Month - CareerStartDate.Month;
+            if (DateTime.UtcNow.Day < CareerStartDate.Day)
+            {
+                --totalMonth; // If current month day is less than day of career start I'll count this month like the previous month 
+            }
             var result = totalMonth - GapInMonths;
-            return result < 0 ? 0 : result;
+            return result;
         }
     }
 
