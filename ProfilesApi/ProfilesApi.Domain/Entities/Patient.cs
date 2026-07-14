@@ -2,8 +2,7 @@
 
 namespace ProfilesApi.Domain.Entities;
 
-public class Patient : BaseEntity
+public class Patient : SoftDeletableEntity
 {
-    public Guid? AccountId { get; set; }
-    public bool IsLinked => AccountId != null;
+    public Guid AccountId { get; set; }
 }

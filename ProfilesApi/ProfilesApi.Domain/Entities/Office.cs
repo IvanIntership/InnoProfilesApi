@@ -3,7 +3,7 @@ using ProfilesApi.Domain.Common;
 
 namespace ProfilesApi.Domain.Entities;
 
-public class Office : SoftDeletableEntity
+public class Office : BaseEntity
 {
     public string Address { get; set; }
     public string PhoneNumber { get; set; }

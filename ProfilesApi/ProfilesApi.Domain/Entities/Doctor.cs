@@ -4,11 +4,11 @@ namespace ProfilesApi.Domain.Entities;
 
 public class Doctor : SoftDeletableEntity
 {
-    public Guid? AccountId { get; set; }
+    public Guid AccountId { get; set; }
     public Guid SpecializationId { get; init; }
     public Guid OfficeId { get; set; }
-    private DateTime CareerStartDate { get; init; }
-    private int GapInMonths { get; set; }
+    public DateTime CareerStartDate { get; init; }
+    public int GapInMonths { get; set; }
     public string Degree { get; set; }
 
     public int TotalExperience

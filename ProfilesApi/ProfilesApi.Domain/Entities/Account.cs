@@ -1,10 +1,11 @@
 ﻿using System.Text.RegularExpressions;
 using ProfilesApi.Domain.Common;
 using ProfilesApi.Domain.Enums;
+using ProfilesApi.Domain.Interfaces;
 
 namespace ProfilesApi.Domain.Entities;
 
-public class Account : SoftDeletableEntity
+public class Account : SoftDeletableEntity, IAuditable
 {
     public string Firstname { get; set; }
     public string Lastname { get; set; }
