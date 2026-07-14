@@ -30,17 +30,7 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
         
-        builder.HasOne<Office>()
-            .WithOne()
-            .HasForeignKey<Doctor>(d => d.OfficeId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
-        
-        builder.HasIndex(d => d.SpecializationId);
-        
         builder.HasIndex(d => d.AccountId)
             .IsUnique();
-        
-        builder.HasIndex(d => d.OfficeId);
     }
 }

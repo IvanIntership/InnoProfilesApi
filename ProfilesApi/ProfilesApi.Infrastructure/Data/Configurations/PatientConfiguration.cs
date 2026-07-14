@@ -16,7 +16,7 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
             .WithOne()
             .HasForeignKey<Patient>(p => p.AccountId)
             .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(p => p.AccountId)
             .IsUnique();
