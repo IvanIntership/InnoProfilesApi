@@ -4,10 +4,10 @@ namespace ProfilesApi.Domain.Entities;
 
 public class Administrator : SoftDeletableEntity
 {
-    public Guid? AccountId { get; set; }
+    public Guid AccountId { get; set; }
     public Guid OfficeId { get; set; }
-    private DateTime CareerStartDate { get; init; }
-    private int GapInMonths { get; set; }
+    public DateTime CareerStartDate { get; init; }
+    public int GapInMonths { get; set; }
 
     public int TotalExperience
     {

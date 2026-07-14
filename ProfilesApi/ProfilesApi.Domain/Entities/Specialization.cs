@@ -2,7 +2,7 @@
 
 namespace ProfilesApi.Domain.Entities;
 
-public class Specialization : SoftDeletableEntity
+public class Specialization : BaseEntity
 {
     public string Name { get; set; }
 
