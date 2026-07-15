@@ -13,11 +13,7 @@ public class SpecializationRepository : GenericRepository<Specialization>, ISpec
 
     public async Task<IEnumerable<Specialization>> SearchByTerm(string name, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name)) return new List<Specialization>();
-
-        name = name.Trim();
         IQueryable<Specialization> query = Entities.AsQueryable();
-        query = query.Where(a => a.Name.Contains(name));
-        return await query.ToListAsync(cancellationToken);
+        return await query.Where(a => a.Name.Contains(name)).ToListAsync(cancellationToken);
     }
 }

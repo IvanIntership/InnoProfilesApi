@@ -13,7 +13,7 @@ public class PatientRepository : GenericRepository<Patient>, IPatientRepository
 
     public async Task<Patient?> GetByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default)
     {
-        return await Context.Patients
+        return await Entities
             .Include(p => p.Account)
             .FirstOrDefaultAsync(p => p.AccountId == accountId, cancellationToken);
     }

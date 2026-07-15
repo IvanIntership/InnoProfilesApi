@@ -13,18 +13,13 @@ public class DoctorRepository : GenericRepository<Doctor>, IDoctorRepository
     
     public async Task<Doctor?> GetByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default)
     {
-        return await Context.Doctors
+        return await Entities
             .Include(d => d.Account)
             .FirstOrDefaultAsync(d => d.AccountId == accountId, cancellationToken);
     }
 
     public async Task<IEnumerable<Doctor>> SearchDoctorByNameAsync(string name, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name)) 
-            return new List<Doctor>();
-
-        name = name.Trim().ToLower();
-
         return await Entities
             .Include(d => d.Account)
             .Where(d => d.Account.Firstname.ToLower().Contains(name) || 

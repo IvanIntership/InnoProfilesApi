@@ -13,7 +13,7 @@ public class AdministratorRepository : GenericRepository<Administrator>, IAdmini
 
     public async Task<Administrator?> GetByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default)
     {
-        return await Context.Administrators
+        return await Entities
             .Include(a => a.Account)
             .FirstOrDefaultAsync(d => d.AccountId == accountId, cancellationToken);
     }

@@ -6,7 +6,7 @@ using ProfilesApi.Infrastructure.Data;
 
 namespace ProfilesApi.Infrastructure.Repositories;
 
-public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
+public abstract class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 {
     protected readonly AppDbContext Context;
     protected readonly DbSet<T> Entities;
@@ -62,7 +62,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 
     public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
     {
-        await Context.AddAsync(entity, cancellationToken);
+        await Entities.AddAsync(entity, cancellationToken);
     }
 
     public async Task<bool> ExistsAsync(Expression<Func<T, bool>>? filter, CancellationToken cancellationToken = default)
