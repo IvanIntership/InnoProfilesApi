@@ -12,7 +12,7 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
         
         builder.HasKey(p => p.Id);
         
-        builder.HasOne<Account>()
+        builder.HasOne(p => p.Account)
             .WithOne()
             .HasForeignKey<Patient>(p => p.AccountId)
             .IsRequired()

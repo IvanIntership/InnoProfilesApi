@@ -16,7 +16,7 @@ public class OfficeConfiguration : IEntityTypeConfiguration<Office>
         builder.Property(o => o.PhoneNumber)
             .HasMaxLength(20);
 
-        builder.HasOne<Photo>()
+        builder.HasOne(o => o.Photo)
             .WithOne()
             .HasForeignKey<Office>(o => o.PhotoId)
             .IsRequired(false)
