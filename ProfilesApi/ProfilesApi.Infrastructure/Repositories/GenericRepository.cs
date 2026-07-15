@@ -46,9 +46,9 @@ public abstract class GenericRepository<T> : IGenericRepository<T> where T : Bas
         Entities.Remove(entity);
     }
 
-    public void Update(T entity)
+    public void Add(T entity)
     {
-        Entities.Update(entity);
+        Entities.Add(entity);
     }
 
     public async Task<bool> ExistsAsync(Expression<Func<T, bool>>? filter, CancellationToken cancellationToken = default)

@@ -13,8 +13,6 @@ public interface IGenericRepository<T> where T : BaseEntity
         params Expression<Func<T, object>>[]? includesProperties);
 
     void Delete(T entity);
-    
-    void Update(T entity);
-    
+    void Add(T entity);
     Task<bool> ExistsAsync(Expression<Func<T, bool>>? filter, CancellationToken cancellationToken = default);
 }
