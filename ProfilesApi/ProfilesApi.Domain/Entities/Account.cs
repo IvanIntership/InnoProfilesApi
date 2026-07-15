@@ -15,8 +15,9 @@ public class Account : SoftDeletableEntity, IAuditable
     public string PasswordHash { get; set; }
     public Roles Role { get; set; }
     public Guid? PhotoId { get; set; }
+    public virtual Photo? Photo { get; set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow; // I want to trigger it in Infrastructure layer in DbContext.
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public Guid CreatedBy { get; init; }
     public Guid UpdatedBy { get; set; }
     

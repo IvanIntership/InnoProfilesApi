@@ -18,15 +18,21 @@ public class DoctorConfiguration : IEntityTypeConfiguration<Doctor>
         builder.Property(d => d.Degree)
             .HasMaxLength(30);
         
-        builder.HasOne<Specialization>()
+        builder.HasOne(d => d.Specialization)
             .WithMany()
             .HasForeignKey(d => d.SpecializationId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne<Office>()
+        builder.HasOne(d => d.Office)
             .WithMany()
             .HasForeignKey(d => d.OfficeId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.HasOne(d => d.Account)
+            .WithOne()
+            .HasForeignKey<Doctor>(d => d.AccountId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
         

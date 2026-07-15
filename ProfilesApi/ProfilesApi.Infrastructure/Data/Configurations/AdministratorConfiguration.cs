@@ -15,13 +15,13 @@ public class AdministratorConfiguration : IEntityTypeConfiguration<Administrator
         builder.Property(a => a.GapInMonths)
             .HasColumnType("smallint");
         
-        builder.HasOne<Account>()
+        builder.HasOne(a => a.Account)
             .WithOne()
             .HasForeignKey<Administrator>(a => a.AccountId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
         
-        builder.HasOne<Office>()
+        builder.HasOne(a => a.Office)
             .WithMany()
             .HasForeignKey(a => a.OfficeId)
             .IsRequired()

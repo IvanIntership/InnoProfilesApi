@@ -24,7 +24,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(a => a.PhoneNumber)
             .HasMaxLength(20);
         
-        builder.HasOne<Photo>()
+        builder.HasOne(a => a.Photo)
             .WithOne()
             .HasForeignKey<Account>(a => a.PhotoId)
             .IsRequired(false)
