@@ -10,4 +10,11 @@ public class OfficeRepository : GenericRepository<Office>, IOfficeRepository
     public OfficeRepository(AppDbContext context) : base(context)
     {
     }
+
+    public async Task<Office?> GetWithDetailsAsync(Guid officeId, CancellationToken cancellationToken = default)
+    {
+        return await Entities
+            .Include(o => o.Photo)
+            .FirstOrDefaultAsync(a => a.Id == officeId, cancellationToken);
+    }
 }

@@ -16,16 +16,9 @@ public abstract class GenericRepository<T> : IGenericRepository<T> where T : Bas
         Context = context;
         Entities = Context.Set<T>();
     }
-    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[]? includesProperties)
+    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         IQueryable<T> query = Entities.AsQueryable();
-        if (includesProperties != null)
-        {
-            foreach (var includeProperty in includesProperties)
-            {
-                query = query.Include(includeProperty);
-            }
-        }
         return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
@@ -48,21 +41,14 @@ public abstract class GenericRepository<T> : IGenericRepository<T> where T : Bas
         return await query.ToListAsync(cancellationToken);
     }
 
-    public Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
+    public void Delete(T entity)
     {
         Entities.Remove(entity);
-        return Task.CompletedTask;
     }
 
-    public Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
+    public void Update(T entity)
     {
         Entities.Update(entity);
-        return Task.CompletedTask;
-    }
-
-    public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
-    {
-        await Entities.AddAsync(entity, cancellationToken);
     }
 
     public async Task<bool> ExistsAsync(Expression<Func<T, bool>>? filter, CancellationToken cancellationToken = default)

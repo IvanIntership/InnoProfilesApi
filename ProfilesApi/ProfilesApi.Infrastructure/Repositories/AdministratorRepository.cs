@@ -17,4 +17,12 @@ public class AdministratorRepository : GenericRepository<Administrator>, IAdmini
             .Include(a => a.Account)
             .FirstOrDefaultAsync(d => d.AccountId == accountId, cancellationToken);
     }
+
+    public async Task<Administrator?> GetWithDetailsAsync(Guid administratorId, CancellationToken cancellationToken = default)
+    {
+        return await Entities
+            .Include(a => a.Account)
+            .Include(a => a.Office)
+            .FirstOrDefaultAsync(a => a.Id == administratorId, cancellationToken);
+    }
 }

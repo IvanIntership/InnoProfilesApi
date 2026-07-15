@@ -26,4 +26,13 @@ public class DoctorRepository : GenericRepository<Doctor>, IDoctorRepository
                         d.Account.Lastname.ToLower().Contains(name))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<Doctor?> GetWithDetailsAsync(Guid doctorId, CancellationToken cancellationToken = default)
+    {
+        return await Entities
+            .Include(d => d.Account)
+            .Include(d => d.Office)
+            .Include(d => d.Specialization)
+            .FirstOrDefaultAsync(a => a.Id == doctorId, cancellationToken);
+    }
 }

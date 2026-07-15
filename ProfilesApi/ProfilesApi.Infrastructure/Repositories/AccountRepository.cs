@@ -13,9 +13,6 @@ public class AccountRepository : GenericRepository<Account>, IAccountRepository
 
     public async Task<IEnumerable<Account>> SearchByTerm(string name, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name)) return new List<Account>();
-
-        name = name.Trim();
         IQueryable<Account> query = Entities.AsQueryable();
         query = query.Where(a => a.Firstname.Contains(name) || 
                                  a.Lastname.Contains(name) || 
@@ -24,11 +21,15 @@ public class AccountRepository : GenericRepository<Account>, IAccountRepository
         return await query.ToListAsync(cancellationToken);
     }
 
+    public async Task<Account?> GetWithDetailsAsync(Guid accountId, CancellationToken cancellationToken = default)
+    {
+        return await Entities
+            .Include(a => a.Photo)
+            .FirstOrDefaultAsync(a => a.Id == accountId, cancellationToken);
+    }
+
     public async Task<Account?> GetByEmail(string email, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(email)) return null;
-        
-        email = email.Trim();
         IQueryable<Account> query = Entities.AsQueryable();
         query = query.Where(a => a.Email == email);
         return await query.FirstOrDefaultAsync(cancellationToken);
@@ -36,9 +37,6 @@ public class AccountRepository : GenericRepository<Account>, IAccountRepository
 
     public async Task<Account?> GetByPhoneNumber(string phoneNumber, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(phoneNumber)) return null;
-        
-        phoneNumber = phoneNumber.Trim();
         IQueryable<Account> query = Entities.AsQueryable();
         query = query.Where(a => a.PhoneNumber == phoneNumber);
         return await query.FirstOrDefaultAsync(cancellationToken);
@@ -46,9 +44,6 @@ public class AccountRepository : GenericRepository<Account>, IAccountRepository
 
     public async Task<IEnumerable<Account>> GetByName(string name, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(name)) return new List<Account>();
-
-        name = name.Trim();
         IQueryable<Account> query = Entities.AsQueryable();
         query = query.Where(a => a.Firstname == (name) || 
                                  a.Lastname == (name) || 
