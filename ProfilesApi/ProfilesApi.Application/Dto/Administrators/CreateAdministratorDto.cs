@@ -1,0 +1,13 @@
+﻿namespace ProfilesApi.Application.Dto.Administrators;
+
+public record CreateAdministratorDto(
+    string Firstname,
+    string Lastname,
+    DateTime Birthday,
+    string PhoneNumber,
+    string Email,
+    string Password,
+    Guid OfficeId,
+    DateTime CareerStartDate,
+    int GapInMonths
+);
