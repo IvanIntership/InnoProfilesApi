@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Interfaces;
 using ProfilesApi.Infrastructure.Data;
 using ProfilesApi.Infrastructure.Repositories;
@@ -21,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IPatientRepository, PatientRepository>();
         services.AddScoped<IPhotoRepository, PhotoRepository>();
         services.AddScoped<ISpecializationRepository, SpecializationRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         
         return services;
     }

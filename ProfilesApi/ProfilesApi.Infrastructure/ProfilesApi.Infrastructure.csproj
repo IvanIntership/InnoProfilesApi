@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\ProfilesApi.Application\ProfilesApi.Application.csproj" />
       <ProjectReference Include="..\ProfilesApi.Domain\ProfilesApi.Domain.csproj" />
     </ItemGroup>
 
