@@ -39,4 +39,9 @@ public class UnitOfWork : IUnitOfWork
     {
         return await _context.SaveChangesAsync();
     }
+
+    public void Complete()
+    {
+        _context.SaveChanges();
+    }
 }
