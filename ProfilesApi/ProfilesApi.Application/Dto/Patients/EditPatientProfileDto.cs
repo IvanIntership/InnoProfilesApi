@@ -1,7 +1,7 @@
 ﻿namespace ProfilesApi.Application.Dto.Patients;
 
 public record EditPatientProfileDto(
-    Guid PatientId,
+    Guid Id,
     string Firstname,
     string Lastname,
     string PhoneNumber,

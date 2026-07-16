@@ -4,7 +4,8 @@ using ProfilesApi.Domain.Enums;
 
 namespace ProfilesApi.Application.Dto.Administrators;
 
-public record AdministratorDto(Guid Id,
+public record AdministratorDto(
+    Guid Id,
     string Firstname,
     string Lastname,
     DateTime Birthday,

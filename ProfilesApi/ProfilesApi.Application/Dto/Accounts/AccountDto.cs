@@ -3,7 +3,8 @@ using ProfilesApi.Domain.Enums;
 
 namespace ProfilesApi.Application.Dto.Accounts;
 
-public record AccountDto(Guid Id,
+public record AccountDto(
+    Guid Id,
     string Firstname,
     string Lastname,
     DateTime Birthday,

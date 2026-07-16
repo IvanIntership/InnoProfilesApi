@@ -1,7 +1,7 @@
 ﻿namespace ProfilesApi.Application.Dto.Administrators;
 
 public record EditAdministratorProfileDto(
-    Guid AdministratorId,
+    Guid Id,
     string Firstname,
     string Lastname,
     DateTime Birthday,

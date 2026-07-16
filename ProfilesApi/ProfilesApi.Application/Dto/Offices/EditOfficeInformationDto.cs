@@ -1,7 +1,7 @@
 ﻿namespace ProfilesApi.Application.Dto.Offices;
 
 public record EditOfficeInformationDto(
-    Guid OfficeId,
+    Guid Id,
     string Address,
     string PhoneNumber,
     Guid? PhotoId);
