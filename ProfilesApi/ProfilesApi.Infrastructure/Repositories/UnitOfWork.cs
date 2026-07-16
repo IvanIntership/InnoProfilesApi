@@ -1,4 +1,5 @@
-﻿using ProfilesApi.Domain.Interfaces;
+﻿using ProfilesApi.Application.Interfaces;
+using ProfilesApi.Domain.Interfaces;
 using ProfilesApi.Infrastructure.Data;
 
 namespace ProfilesApi.Infrastructure.Repositories;

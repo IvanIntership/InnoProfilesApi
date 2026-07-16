@@ -1,4 +1,6 @@
-﻿namespace ProfilesApi.Domain.Interfaces;
+﻿using ProfilesApi.Domain.Interfaces;
+
+namespace ProfilesApi.Application.Interfaces;
 
 public interface IUnitOfWork
 {

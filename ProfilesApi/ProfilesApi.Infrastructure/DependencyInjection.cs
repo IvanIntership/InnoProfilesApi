@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Interfaces;
 using ProfilesApi.Infrastructure.Data;
 using ProfilesApi.Infrastructure.Repositories;
