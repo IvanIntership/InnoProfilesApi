@@ -1,3 +1,5 @@
 ﻿namespace ProfilesApi.Application.Dto.Specializations;
 
-public record EditSpecializationInformationDto(string Name);
+public record EditSpecializationInformationDto(
+    Guid SpecializationId,
+    string Name);

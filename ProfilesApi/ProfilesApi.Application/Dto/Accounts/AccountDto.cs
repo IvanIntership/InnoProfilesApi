@@ -10,4 +10,5 @@ public record AccountDto(Guid Id,
     string PhoneNumber,
     string Email,
     Roles Role,
-    PhotoDto? Photo);
+    string? PhotoUrl,
+    Guid? PhotoId);

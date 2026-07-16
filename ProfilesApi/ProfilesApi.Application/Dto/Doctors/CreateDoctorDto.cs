@@ -1,6 +1,7 @@
 ﻿namespace ProfilesApi.Application.Dto.Doctors;
 
-public record CreateDoctorDto(string Firstname,
+public record CreateDoctorDto(
+    string Firstname,
     string Lastname,
     DateTime Birthday,
     string PhoneNumber,

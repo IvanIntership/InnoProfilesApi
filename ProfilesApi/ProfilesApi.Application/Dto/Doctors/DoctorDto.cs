@@ -1,6 +1,7 @@
 ﻿namespace ProfilesApi.Application.Dto.Doctors;
 
 public record DoctorDto(
+    Guid Id,
     string Firstname,
     string Lastname,
     DateTime Birthday,
@@ -10,5 +11,7 @@ public record DoctorDto(
     string Degree,
     Guid OfficeId,
     Guid SpecializationId,
+    Guid? PhotoId,
+    string? PhotoUrl,
     DateTime CareerStartDate,
     int GapInMonths);
