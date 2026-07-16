@@ -11,6 +11,6 @@ public interface IUnitOfWork
     IPatientRepository Patient { get; }
     IPhotoRepository Photos { get; }
     ISpecializationRepository Specializations { get; }
-
+    int Complete();
     Task<int> CompleteAsync();
 }
