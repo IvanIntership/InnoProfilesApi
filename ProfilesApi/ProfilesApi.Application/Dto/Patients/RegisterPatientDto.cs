@@ -1,4 +1,6 @@
-﻿namespace ProfilesApi.Application.Dto.Patients;
+﻿using ProfilesApi.Application.Interfaces;
+
+namespace ProfilesApi.Application.Dto.Patients;
 
 public record RegisterPatientDto(
     string Firstname,
@@ -6,4 +8,5 @@ public record RegisterPatientDto(
     DateTime Birthday,
     string PhoneNumber,
     string Email,
-    string Password);
+    Guid? PhotoId,
+    string Password) : IBaseProfileDto, IWithPassword;

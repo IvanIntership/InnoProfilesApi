@@ -1,4 +1,6 @@
-﻿namespace ProfilesApi.Application.Dto.Doctors;
+﻿using ProfilesApi.Application.Interfaces;
+
+namespace ProfilesApi.Application.Dto.Doctors;
 
 public record DoctorDto(
     Guid Id,
@@ -14,4 +16,4 @@ public record DoctorDto(
     Guid? PhotoId,
     string? PhotoUrl,
     DateTime CareerStartDate,
-    int GapInMonths);
+    int GapInMonths) : IBaseProfileDto, IWithPassword;

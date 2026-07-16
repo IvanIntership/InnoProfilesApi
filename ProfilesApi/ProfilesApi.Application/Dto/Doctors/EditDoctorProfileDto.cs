@@ -1,4 +1,6 @@
-﻿namespace ProfilesApi.Application.Dto.Doctors;
+﻿using ProfilesApi.Application.Interfaces;
+
+namespace ProfilesApi.Application.Dto.Doctors;
 
 public record EditDoctorProfileDto(
     Guid Id,
@@ -12,4 +14,4 @@ public record EditDoctorProfileDto(
     Guid OfficeId,
     DateTime CareerStartDate,
     int GapInMonths,
-    string Degree);
+    string Degree) : IBaseProfileDto;

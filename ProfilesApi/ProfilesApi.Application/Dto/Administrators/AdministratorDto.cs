@@ -1,5 +1,6 @@
 ﻿using ProfilesApi.Application.Dto.Accounts;
 using ProfilesApi.Application.Dto.Offices;
+using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Enums;
 
 namespace ProfilesApi.Application.Dto.Administrators;
@@ -15,4 +16,4 @@ public record AdministratorDto(
     string? PhotoUrl,
     Guid? PhotoId,
     Guid OfficeId,
-    int TotalExperience);
+    int TotalExperience) : IBaseProfileDto;

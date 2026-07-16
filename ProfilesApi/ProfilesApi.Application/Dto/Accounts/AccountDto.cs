@@ -1,4 +1,5 @@
 ﻿using ProfilesApi.Application.Dto.Photos;
+using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Enums;
 
 namespace ProfilesApi.Application.Dto.Accounts;
@@ -12,4 +13,4 @@ public record AccountDto(
     string Email,
     Roles Role,
     string? PhotoUrl,
-    Guid? PhotoId);
+    Guid? PhotoId) : IBaseProfileDto;

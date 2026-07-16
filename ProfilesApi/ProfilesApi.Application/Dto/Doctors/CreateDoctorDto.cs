@@ -1,4 +1,6 @@
-﻿namespace ProfilesApi.Application.Dto.Doctors;
+﻿using ProfilesApi.Application.Interfaces;
+
+namespace ProfilesApi.Application.Dto.Doctors;
 
 public record CreateDoctorDto(
     string Firstname,
@@ -11,4 +13,5 @@ public record CreateDoctorDto(
     Guid SpecializationId,
     DateTime CareerStartDate,
     int GapInMonths,
-    string Degree);
+    Guid? PhotoId,
+    string Degree) : IBaseProfileDto, IWithPassword;

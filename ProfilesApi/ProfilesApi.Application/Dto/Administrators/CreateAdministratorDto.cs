@@ -1,4 +1,6 @@
-﻿namespace ProfilesApi.Application.Dto.Administrators;
+﻿using ProfilesApi.Application.Interfaces;
+
+namespace ProfilesApi.Application.Dto.Administrators;
 
 public record CreateAdministratorDto(
     string Firstname,
@@ -7,7 +9,8 @@ public record CreateAdministratorDto(
     string PhoneNumber,
     string Email,
     string Password,
+    Guid? PhotoId,
     Guid OfficeId,
     DateTime CareerStartDate,
     int GapInMonths
-);
+) : IBaseProfileDto, IWithPassword;

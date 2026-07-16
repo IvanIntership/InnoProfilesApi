@@ -1,4 +1,5 @@
 ﻿using ProfilesApi.Application.Dto.Accounts;
+using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Enums;
 
 namespace ProfilesApi.Application.Dto.Patients;
@@ -12,4 +13,4 @@ public record PatientDto(
     string Email,
     Roles Role,
     string? PhotoUrl,
-    Guid? PhotoId);
+    Guid? PhotoId) : IBaseProfileDto;
