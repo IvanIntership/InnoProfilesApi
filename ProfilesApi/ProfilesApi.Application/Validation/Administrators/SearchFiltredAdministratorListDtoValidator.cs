@@ -11,7 +11,7 @@ public class SearchFilteredAdministratorValidator : AbstractValidator<SearchFilt
         RuleFor(x => x.OfficeId)
             .NotEqual(Guid.Empty).WithMessage("Invalid photo ID format.")
             .When(x => x.OfficeId.HasValue);
-        
-        Include(new SearchListValidator());
+
+        RuleFor(x => x.SearchTerm).SearchTermRules();
     }
 }

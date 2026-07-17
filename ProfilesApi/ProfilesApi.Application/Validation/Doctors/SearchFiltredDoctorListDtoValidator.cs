@@ -12,7 +12,7 @@ public class SearchFiltredDoctorListDtoValidator : AbstractValidator<SearchFilte
             .NotEqual(Guid.Empty).WithMessage("Invalid photo ID format.")
             .When(x => x.OfficeId.HasValue);
         
-        Include(new SearchListValidator());
+        RuleFor(x => x.SearchTerm).SearchTermRules();
         
         RuleFor(x => x.SpecializationId)
             .NotEqual(Guid.Empty).WithMessage("Invalid photo ID format.")

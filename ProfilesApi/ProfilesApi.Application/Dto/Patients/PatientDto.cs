@@ -13,4 +13,4 @@ public record PatientDto(
     string Email,
     Roles Role,
     string? PhotoUrl,
-    Guid? PhotoId) : IBaseProfileDto;
+    Guid? PhotoId);

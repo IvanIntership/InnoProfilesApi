@@ -16,4 +16,4 @@ public record AdministratorDto(
     string? PhotoUrl,
     Guid? PhotoId,
     Guid OfficeId,
-    int TotalExperience) : IBaseProfileDto;
+    int TotalExperience);

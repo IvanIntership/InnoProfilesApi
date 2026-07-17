@@ -13,4 +13,4 @@ public record EditAdministratorProfileDto(
     Guid OfficeId,
     DateTime CareerStartDate,
     int GapInMonths
-) : IBaseProfileDto;
+) ;

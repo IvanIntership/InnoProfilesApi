@@ -14,4 +14,4 @@ public record CreateDoctorDto(
     DateTime CareerStartDate,
     int GapInMonths,
     Guid? PhotoId,
-    string Degree) : IBaseProfileDto, IWithPassword;
+    string Degree);

@@ -16,4 +16,4 @@ public record DoctorDto(
     Guid? PhotoId,
     string? PhotoUrl,
     DateTime CareerStartDate,
-    int GapInMonths) : IBaseProfileDto, IWithPassword;
+    int GapInMonths);

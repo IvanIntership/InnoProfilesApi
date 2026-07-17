@@ -8,6 +8,11 @@ public class CreateOfficeDtoValidator : AbstractValidator<CreateOfficeDto>
 {
     public CreateOfficeDtoValidator()
     {
-        Include(new OfficeValidator());
+        RuleFor(x => x.PhotoId)
+            .NotEqual(Guid.Empty).WithMessage("Invalid photo ID format.")
+            .When(x => x.PhotoId.HasValue);
+        
+        RuleFor(x => x.Address).AddressRules();
+        RuleFor(x => x.PhoneNumber).PhoneNumberRules();
     }
 }

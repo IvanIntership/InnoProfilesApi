@@ -8,7 +8,7 @@ public class SearchFilteredPatientListDtoValidator : AbstractValidator<SearchFil
 {
     public SearchFilteredPatientListDtoValidator()
     {
-        Include(new SearchListValidator());
+        RuleFor(x => x.SearchTerm).SearchTermRules();
         
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()

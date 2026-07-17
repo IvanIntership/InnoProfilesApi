@@ -7,4 +7,4 @@ public record SearchFilteredDoctorListDto(
     Guid? SpecializationId = null,
     Guid? OfficeId = null,
     int? MinExperienceYears = null
-)  : ISearchList;
+);

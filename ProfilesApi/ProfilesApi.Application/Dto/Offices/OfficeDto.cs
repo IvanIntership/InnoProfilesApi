@@ -8,4 +8,4 @@ public record OfficeDto(
     string Address,
     string PhoneNumber,
     Guid? PhotoId,
-    string? PhotoUrl) : IOfficeDto;
+    string? PhotoUrl);

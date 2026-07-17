@@ -8,8 +8,12 @@ public class DoctorDtoValidator : AbstractValidator<DoctorDto>
 {
     public DoctorDtoValidator()
     {
-        Include(new BaseProfileValidator());
-        Include(new PasswordValidator());
+        RuleFor(x => x.Firstname).FirstnameRules();
+        RuleFor(x => x.Lastname).LastnameRules();
+        RuleFor(x => x.Birthday).BirthdayRules();
+        RuleFor(x => x.PhoneNumber).PhoneNumberRules();
+        RuleFor(x => x.Email).EmailRules();
+        RuleFor(x => x.Password).PasswordRules();
         
         RuleFor(x => x.Id).NotEmpty();
         

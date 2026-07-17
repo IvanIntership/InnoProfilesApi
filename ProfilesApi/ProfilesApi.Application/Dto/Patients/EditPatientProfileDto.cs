@@ -9,4 +9,4 @@ public record EditPatientProfileDto(
     DateTime Birthday,
     string PhoneNumber,
     string Email,
-    Guid? PhotoId) : IBaseProfileDto;
+    Guid? PhotoId);

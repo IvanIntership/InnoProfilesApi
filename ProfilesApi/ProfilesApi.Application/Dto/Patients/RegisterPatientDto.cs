@@ -9,4 +9,4 @@ public record RegisterPatientDto(
     string PhoneNumber,
     string Email,
     Guid? PhotoId,
-    string Password) : IBaseProfileDto, IWithPassword;
+    string Password);

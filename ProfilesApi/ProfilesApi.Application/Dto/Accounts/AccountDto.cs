@@ -13,4 +13,4 @@ public record AccountDto(
     string Email,
     Roles Role,
     string? PhotoUrl,
-    Guid? PhotoId) : IBaseProfileDto;
+    Guid? PhotoId);

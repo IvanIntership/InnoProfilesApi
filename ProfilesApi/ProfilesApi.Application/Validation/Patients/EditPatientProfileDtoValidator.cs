@@ -8,7 +8,11 @@ public class EditPatientProfileDtoValidator : AbstractValidator<EditPatientProfi
 {
     public EditPatientProfileDtoValidator()
     {
-        Include(new BaseProfileValidator());
+        RuleFor(x => x.Firstname).FirstnameRules();
+        RuleFor(x => x.Lastname).LastnameRules();
+        RuleFor(x => x.Birthday).BirthdayRules();
+        RuleFor(x => x.PhoneNumber).PhoneNumberRules();
+        RuleFor(x => x.Email).EmailRules();
 
         RuleFor(x => x.Id)
             .NotEmpty().WithMessage("Invalid patient ID.");

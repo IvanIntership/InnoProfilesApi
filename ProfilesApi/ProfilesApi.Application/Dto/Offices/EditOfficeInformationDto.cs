@@ -6,4 +6,4 @@ public record EditOfficeInformationDto(
     Guid Id,
     string Address,
     string PhoneNumber,
-    Guid? PhotoId) : IOfficeDto;
+    Guid? PhotoId);

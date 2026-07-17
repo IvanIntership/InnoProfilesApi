@@ -14,4 +14,4 @@ public record EditDoctorProfileDto(
     Guid OfficeId,
     DateTime CareerStartDate,
     int GapInMonths,
-    string Degree) : IBaseProfileDto;
+    string Degree);
