@@ -22,7 +22,7 @@ public class PatientDtoValidator : AbstractValidator<PatientDto>
             .WithMessage("Undefined role.");
         
         RuleFor(x => x.PhotoId)
-            .NotEqual(Guid.Empty).WithMessage("Invalid photo ID format.")
+            .NotEmpty().WithMessage("Invalid photo ID format.")
             .When(x => x.PhotoId.HasValue);
     }
 }

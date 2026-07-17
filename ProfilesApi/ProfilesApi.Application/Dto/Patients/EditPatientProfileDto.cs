@@ -1,6 +1,4 @@
-﻿using ProfilesApi.Application.Interfaces;
-
-namespace ProfilesApi.Application.Dto.Patients;
+﻿namespace ProfilesApi.Application.Dto.Patients;
 
 public record EditPatientProfileDto(
     Guid Id,

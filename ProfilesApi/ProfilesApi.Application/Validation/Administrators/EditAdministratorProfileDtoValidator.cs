@@ -18,7 +18,7 @@ public class EditAdministratorProfileDtoValidator : AbstractValidator<EditAdmini
             .NotEmpty().WithMessage("ID is required.");
         
         RuleFor(x => x.PhotoId)
-            .NotEqual(Guid.Empty).WithMessage("Invalid photo ID format.")
+            .NotEmpty().WithMessage("Invalid photo ID format.")
             .When(x => x.PhotoId.HasValue);
 
         RuleFor(x => x.OfficeId)

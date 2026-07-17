@@ -9,13 +9,13 @@ public class SearchFiltredDoctorListDtoValidator : AbstractValidator<SearchFilte
     public SearchFiltredDoctorListDtoValidator()
     {
         RuleFor(x => x.OfficeId)
-            .NotEqual(Guid.Empty).WithMessage("Invalid photo ID format.")
+            .NotEmpty().WithMessage("Invalid photo ID format.")
             .When(x => x.OfficeId.HasValue);
         
         RuleFor(x => x.SearchTerm).SearchTermRules();
         
         RuleFor(x => x.SpecializationId)
-            .NotEqual(Guid.Empty).WithMessage("Invalid photo ID format.")
+            .NotEmpty().WithMessage("Invalid specialization ID format.")
             .When(x => x.SpecializationId.HasValue);
         
         RuleFor(x => x.MinExperienceYears)

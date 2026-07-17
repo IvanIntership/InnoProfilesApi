@@ -1,7 +1,4 @@
-﻿using ProfilesApi.Application.Dto.Photos;
-using ProfilesApi.Application.Interfaces;
-
-namespace ProfilesApi.Application.Dto.Offices;
+﻿namespace ProfilesApi.Application.Dto.Offices;
 
 public record OfficeDto(
     Guid Id,

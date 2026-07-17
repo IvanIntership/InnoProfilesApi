@@ -9,7 +9,7 @@ public class SearchFilteredAdministratorValidator : AbstractValidator<SearchFilt
     public SearchFilteredAdministratorValidator()
     {
         RuleFor(x => x.OfficeId)
-            .NotEqual(Guid.Empty).WithMessage("Invalid photo ID format.")
+            .NotEmpty().WithMessage("Invalid photo ID format.")
             .When(x => x.OfficeId.HasValue);
 
         RuleFor(x => x.SearchTerm).SearchTermRules();

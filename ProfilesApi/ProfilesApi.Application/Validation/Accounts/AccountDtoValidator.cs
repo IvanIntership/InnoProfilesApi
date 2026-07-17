@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using ProfilesApi.Application.Dto.Accounts;
 using ProfilesApi.Application.Validation.Shared;
-using ProfilesApi.Domain.Enums;
 
 namespace ProfilesApi.Application.Validation.Accounts;
 
@@ -18,7 +17,7 @@ public class AccountDtoValidator : AbstractValidator<AccountDto>
         RuleFor(x => x.Id).NotEmpty();
         
         RuleFor(x => x.PhotoId)
-            .NotEqual(Guid.Empty).WithMessage("Invalid photo ID format.")
+            .NotEmpty().WithMessage("Invalid photo ID format.")
             .When(x => x.PhotoId.HasValue);
         
         RuleFor(x => x.Role)

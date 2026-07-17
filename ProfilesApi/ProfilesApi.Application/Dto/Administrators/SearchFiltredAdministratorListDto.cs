@@ -1,6 +1,4 @@
-﻿using ProfilesApi.Application.Interfaces;
-
-namespace ProfilesApi.Application.Dto.Administrators;
+﻿namespace ProfilesApi.Application.Dto.Administrators;
 
 public record SearchFilteredAdministratorListDto(
     string? SearchTerm  = null,   

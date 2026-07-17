@@ -1,6 +1,4 @@
-﻿using ProfilesApi.Application.Interfaces;
-
-namespace ProfilesApi.Application.Dto.Doctors;
+﻿namespace ProfilesApi.Application.Dto.Doctors;
 
 public record CreateDoctorDto(
     string Firstname,

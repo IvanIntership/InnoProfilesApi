@@ -1,6 +1,4 @@
-﻿using ProfilesApi.Application.Interfaces;
-
-namespace ProfilesApi.Application.Dto.Offices;
+﻿namespace ProfilesApi.Application.Dto.Offices;
 
 public record EditOfficeInformationDto(
     Guid Id,
