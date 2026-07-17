@@ -10,6 +10,6 @@ public class DoctorMappingProfile : Profile
     {
         CreateMap<Doctor, DoctorDto>();
         CreateMap<CreateDoctorDto, Doctor>();
-        CreateProjection<EditDoctorProfileDto, Doctor>();
+        CreateMap<EditDoctorProfileDto, Doctor>();
     }
 }
