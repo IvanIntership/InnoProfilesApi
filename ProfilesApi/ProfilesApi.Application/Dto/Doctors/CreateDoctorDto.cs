@@ -11,4 +11,5 @@ public record CreateDoctorDto(
     Guid SpecializationId,
     DateTime CareerStartDate,
     int GapInMonths,
+    Guid? PhotoId,
     string Degree);

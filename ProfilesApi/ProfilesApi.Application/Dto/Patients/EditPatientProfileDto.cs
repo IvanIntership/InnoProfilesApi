@@ -4,6 +4,7 @@ public record EditPatientProfileDto(
     Guid Id,
     string Firstname,
     string Lastname,
+    DateTime Birthday,
     string PhoneNumber,
     string Email,
     Guid? PhotoId);

@@ -7,6 +7,7 @@ public record CreateAdministratorDto(
     string PhoneNumber,
     string Email,
     string Password,
+    Guid? PhotoId,
     Guid OfficeId,
     DateTime CareerStartDate,
     int GapInMonths

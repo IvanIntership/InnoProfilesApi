@@ -6,4 +6,5 @@ public record RegisterPatientDto(
     DateTime Birthday,
     string PhoneNumber,
     string Email,
+    Guid? PhotoId,
     string Password);

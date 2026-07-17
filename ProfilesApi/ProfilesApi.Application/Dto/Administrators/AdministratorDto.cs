@@ -1,6 +1,4 @@
-﻿using ProfilesApi.Application.Dto.Accounts;
-using ProfilesApi.Application.Dto.Offices;
-using ProfilesApi.Domain.Enums;
+﻿using ProfilesApi.Domain.Enums;
 
 namespace ProfilesApi.Application.Dto.Administrators;
 

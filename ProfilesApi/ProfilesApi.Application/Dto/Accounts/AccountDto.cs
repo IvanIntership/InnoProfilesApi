@@ -1,5 +1,4 @@
-﻿using ProfilesApi.Application.Dto.Photos;
-using ProfilesApi.Domain.Enums;
+﻿using ProfilesApi.Domain.Enums;
 
 namespace ProfilesApi.Application.Dto.Accounts;
 
