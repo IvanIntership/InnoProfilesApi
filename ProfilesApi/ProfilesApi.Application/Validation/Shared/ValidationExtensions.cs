@@ -8,7 +8,7 @@ public static class ValidationExtensions
     {
         return ruleBuilder
             .MaximumLength(100).WithMessage("The search query is too long.")
-            .MinimumLength(1).WithMessage("You need to enter at least 2 characters to search.")
+            .MinimumLength(1).WithMessage("You need to enter at least 1 character to search.")
             .When(x => !string.IsNullOrEmpty(x as string));
     }
 
