@@ -7,11 +7,10 @@ public interface ISpecializationService
 {
     Task<SpecializationDto> CreateSpecializationAsync(CreateSpecializationDto createSpecializationDto, CancellationToken ct = default);
     
-    Task<IEnumerable<SpecializationDto>> GetSpecializationByNameAsync(SearchQueryDto searchQueryDto, CancellationToken ct = default);
-    Task<IEnumerable<SpecializationDto>> GetSpecializationListAsync(CancellationToken ct = default);
+    Task<IEnumerable<SpecializationDto>> GetSpecializationsAsync(SearchQueryDto? searchQueryDto = null, CancellationToken ct = default);
     Task<SpecializationDto?> GetSpecializationByIdAsync(Guid id, CancellationToken ct = default);
     
     Task DeleteSpecializationAsync(Guid id, CancellationToken ct = default);
     
-    Task UpdateSpecializationAsync(EditSpecializationInformationDto editSpecializationInformationDto, CancellationToken ct = default);
+    Task EditSpecializationAsync(EditSpecializationInformationDto editSpecializationInformationDto, CancellationToken ct = default);
 }
