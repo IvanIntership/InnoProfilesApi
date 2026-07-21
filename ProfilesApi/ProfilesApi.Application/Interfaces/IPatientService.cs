@@ -4,10 +4,7 @@ namespace ProfilesApi.Application.Interfaces;
 
 public interface IPatientService
 {
-    Task<PatientDto> CreatePatientAsync(
-        RegisterPatientDto dto, 
-        Guid? createdById = null, 
-        CancellationToken ct = default); // For registration by administrator and for self-registration. If createdById == null new ID in implementation will be generated before creating an account.
+    Task<PatientDto> CreatePatientAsync(RegisterPatientDto dto, Guid? createdById = null, CancellationToken ct = default);
     
     Task<PatientDto> GetPatientAsync(Guid id, CancellationToken ct = default);
     Task<IEnumerable<PatientDto>> GetPatientsAsync(SearchFilteredPatientListDto filteredPatientListDto, CancellationToken ct = default);

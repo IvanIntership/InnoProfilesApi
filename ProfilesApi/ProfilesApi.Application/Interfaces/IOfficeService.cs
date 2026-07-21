@@ -7,8 +7,7 @@ public interface IOfficeService
 {
     Task<OfficeDto> CreateOfficeAsync(CreateOfficeDto createOfficeDto, CancellationToken ct = default);
     
-    Task<IEnumerable<OfficeDto>> SearchOfficesAsync(SearchQueryDto searchQueryDto, CancellationToken ct = default);
-    Task<IEnumerable<OfficeDto>> GetOfficeListAsync(CancellationToken ct = default);
+    Task<IEnumerable<OfficeDto>> GetOfficeListAsync(SearchQueryDto searchQueryDto, CancellationToken ct = default);
     Task<OfficeDto> GetOfficeByIdAsync(Guid id, CancellationToken ct = default);
     
     Task DeleteOfficeAsync(Guid id, CancellationToken ct = default);
