@@ -12,4 +12,5 @@ public interface IPatientService
     Task<PatientDto> EditPatientAsync(EditPatientProfileDto dto, Guid? editdById = null, CancellationToken ct = default);
     
     Task DeletePatientAsync(Guid id, CancellationToken ct = default);
+    Task<PatientDto> GetByAccountIdAsync(Guid accountId, CancellationToken ct = default);
 }

@@ -8,8 +8,9 @@ public interface IDoctorService
     
     Task DeleteDoctorAsync(Guid id, CancellationToken ct = default);
     
-    Task<EditDoctorProfileDto> EditDoctorProfileAsync(EditDoctorProfileDto editDoctorProfileDto, Guid? editdById = null, CancellationToken ct = default);
+    Task<DoctorDto> EditDoctorProfileAsync(EditDoctorProfileDto editDoctorProfileDto, Guid? editdById = null, CancellationToken ct = default);
     
     Task<DoctorDto> GetDoctorAsync(Guid id, CancellationToken ct = default);
     Task<IEnumerable<DoctorDto>> GetDoctorsAsync(SearchFilteredDoctorListDto filteredDoctorListDto, CancellationToken ct = default);
+    Task<DoctorDto> GetByAccountIdAsync(Guid accountId, CancellationToken ct = default);
 }

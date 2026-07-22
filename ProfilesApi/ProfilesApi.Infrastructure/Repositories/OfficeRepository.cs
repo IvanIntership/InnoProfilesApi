@@ -11,7 +11,7 @@ public class OfficeRepository : GenericRepository<Office>, IOfficeRepository
     {
     }
 
-    public async Task<Office?> GetWithDetailsAsync(Guid officeId, CancellationToken cancellationToken = default)
+    public async Task<Office?> GetWithDetailsAsync(Guid officeId, CancellationToken cancellationToken = default) //remove
     {
         return await Entities
             .Include(o => o.Photo)

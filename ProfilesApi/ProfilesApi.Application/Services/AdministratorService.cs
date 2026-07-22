@@ -9,11 +9,13 @@ public class AdministratorService : IAdministratorService
 {
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public AdministratorService(IMapper mapper, IUnitOfWork unitOfWork)
+    public AdministratorService(IMapper mapper, IUnitOfWork unitOfWork, IPasswordHasher passwordHasher)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
     }
 
     public async Task<AdministratorDto> CreateAdministratorAsync(CreateAdministratorDto createAdministratorDto, Guid createdById,
@@ -38,6 +40,7 @@ public class AdministratorService : IAdministratorService
         var account = _mapper.Map<Account>(createAdministratorDto);
         account.CreatedBy = createdById;
         account.UpdatedBy = createdById;
+        account.PasswordHash = _passwordHasher.HashPassword(createAdministratorDto.Password);
 
         var administrator = _mapper.Map<Administrator>(createAdministratorDto);
 
@@ -73,7 +76,7 @@ public class AdministratorService : IAdministratorService
         await _unitOfWork.CompleteAsync(ct);
     }
 
-    public async Task<EditAdministratorProfileDto> EditAdministratorProfileAsync(EditAdministratorProfileDto editAdministratorProfileDto, Guid editedById,
+    public async Task<AdministratorDto> EditAdministratorProfileAsync(EditAdministratorProfileDto editAdministratorProfileDto, Guid editedById,
         CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(editAdministratorProfileDto);
@@ -97,6 +100,13 @@ public class AdministratorService : IAdministratorService
         {
             throw new InvalidOperationException("Phone number is already in use by another account.");
         }
+        
+        var emailExists = await _unitOfWork.Accounts.ExistsAsync(
+            a => a.Id != administrator.AccountId && a.Email == editAdministratorProfileDto.Email, ct);
+        if (emailExists)
+        {
+            throw new InvalidOperationException("Email is already in use by another account.");
+        }
 
         _mapper.Map(editAdministratorProfileDto, administrator);
         _mapper.Map(editAdministratorProfileDto, administrator.Account);
@@ -104,7 +114,7 @@ public class AdministratorService : IAdministratorService
         administrator.Account.UpdatedBy = editedById;
         
         await _unitOfWork.CompleteAsync(ct);
-        return editAdministratorProfileDto;
+        return _mapper.Map<AdministratorDto>(administrator);
     }
 
     public async Task<AdministratorDto> GetAdministratorAsync(Guid id, CancellationToken ct = default)
@@ -123,18 +133,18 @@ public class AdministratorService : IAdministratorService
         SearchFilteredAdministratorListDto? filteredAdministratorListDto,
         CancellationToken ct = default)
     {
-        var searchTerm = filteredAdministratorListDto?.SearchTerm?.Trim().ToLower();
+        var searchTerm = filteredAdministratorListDto?.SearchTerm?.Trim();
         var officeId = filteredAdministratorListDto?.OfficeId;
-        
+    
         var administrators = await _unitOfWork.Administrators.GetAllAsync(
             filter: a => 
                 (!officeId.HasValue || a.OfficeId == officeId.Value) &&
                 (string.IsNullOrWhiteSpace(searchTerm) ||
-                 a.Account.Firstname.ToLower().Contains(searchTerm) ||
-                 a.Account.Lastname.ToLower().Contains(searchTerm) ||
-                 (a.Account.Firstname + " " + a.Account.Lastname).ToLower().Contains(searchTerm) ||
-                 (a.Account.Lastname + " " + a.Account.Firstname).ToLower().Contains(searchTerm)),
-        
+                 a.Account.Firstname.Contains(searchTerm) ||
+                 a.Account.Lastname.Contains(searchTerm) ||
+                 (a.Account.Firstname + " " + a.Account.Lastname).Contains(searchTerm) ||
+                 (a.Account.Lastname + " " + a.Account.Firstname).Contains(searchTerm)),
+    
             cancellationToken: ct,
 
             includesProperties:
@@ -143,8 +153,19 @@ public class AdministratorService : IAdministratorService
                 a => a.Office
             ]
         );
-        
+    
         return _mapper.Map<IEnumerable<AdministratorDto>>(administrators);
     }
+
+    public async Task<AdministratorDto> GetByAccountIdAsync(Guid accountId, CancellationToken ct = default)
+    {
+        var administrator = await _unitOfWork.Administrators.GetByAccountIdAsync(accountId, ct);
     
+        if (administrator == null)
+        {
+            throw new KeyNotFoundException($"Administrator with account ID '{accountId}' was not found.");
+        }
+    
+        return _mapper.Map<AdministratorDto>(administrator);
+    }
 }

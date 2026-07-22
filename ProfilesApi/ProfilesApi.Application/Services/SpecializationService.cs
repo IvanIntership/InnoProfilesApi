@@ -36,11 +36,23 @@ public class SpecializationService : ISpecializationService
         return _mapper.Map<SpecializationDto>(specialization);
     }
 
-    public async Task<IEnumerable<SpecializationDto>> GetSpecializationsAsync(SearchQueryDto? searchQueryDto = null, CancellationToken ct = default)
+    public async Task<IEnumerable<SpecializationDto>> GetSpecializationsAsync(
+        SearchQueryDto? searchQueryDto = null, 
+        CancellationToken ct = default)
     {
-        var searchQuery = searchQueryDto?.SearchTerm.Trim().ToLower();
-        
-        var specializations = await _unitOfWork.Specializations.GetAllAsync(s => string.IsNullOrEmpty(searchQuery) || s.Name.Contains(searchQuery) , ct);
+        var searchTerm = searchQueryDto?.SearchTerm?.Trim();
+
+        IEnumerable<Specialization> specializations;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            specializations = await _unitOfWork.Specializations.SearchByTerm(searchTerm, ct);
+        }
+        else
+        {
+            specializations = await _unitOfWork.Specializations.GetAllAsync(cancellationToken: ct);
+        }
+
         return _mapper.Map<IEnumerable<SpecializationDto>>(specializations);
     }
 
