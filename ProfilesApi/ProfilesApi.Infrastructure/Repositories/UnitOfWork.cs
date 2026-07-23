@@ -32,13 +32,13 @@ public class UnitOfWork : IUnitOfWork
     public IAdministratorRepository Administrators => _administratorsRepository.Value;
     public IDoctorRepository Doctors => _doctorsRepository.Value;
     public IOfficeRepository Offices =>  _officesRepository.Value;
-    public IPatientRepository Patient => _patientsRepository.Value;
+    public IPatientRepository Patients => _patientsRepository.Value;
     public IPhotoRepository Photos => _photosRepository.Value;
     public ISpecializationRepository Specializations => _specializationsRepository.Value;
     
-    public async Task<int> CompleteAsync()
+    public async Task<int> CompleteAsync(CancellationToken ct = default)
     {
-        return await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync(ct);
     }
 
     public int Complete()

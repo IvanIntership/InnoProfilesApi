@@ -1,4 +1,6 @@
-﻿namespace ProfilesApi.Application.Dto.Doctors;
+﻿using ProfilesApi.Domain.Enums;
+
+namespace ProfilesApi.Application.Dto.Doctors;
 
 public record DoctorDto(
     Guid Id,
@@ -9,6 +11,7 @@ public record DoctorDto(
     string Email,
     string Password,
     string Degree,
+    Roles Role,
     Guid OfficeId,
     Guid SpecializationId,
     Guid? PhotoId,

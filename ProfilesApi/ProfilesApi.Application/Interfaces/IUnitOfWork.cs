@@ -8,9 +8,9 @@ public interface IUnitOfWork
     IAdministratorRepository Administrators { get; }
     IDoctorRepository Doctors { get; }
     IOfficeRepository Offices { get; }
-    IPatientRepository Patient { get; }
+    IPatientRepository Patients { get; }
     IPhotoRepository Photos { get; }
     ISpecializationRepository Specializations { get; }
     int Complete();
-    Task<int> CompleteAsync();
+    Task<int> CompleteAsync(CancellationToken ct = default);
 }

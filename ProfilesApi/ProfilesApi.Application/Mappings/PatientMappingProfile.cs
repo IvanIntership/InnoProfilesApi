@@ -8,7 +8,9 @@ public class PatientMappingProfile : Profile
 {
     public PatientMappingProfile()
     {
-        CreateMap<Patient, PatientDto>();
-        CreateMap<EditPatientProfileDto, Patient>();
+        CreateMap<Patient, PatientDto>()
+            .IncludeMembers(src => src.Account);
+        CreateMap<EditPatientProfileDto, Patient>()
+            .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src));
     }
 }

@@ -5,6 +5,7 @@ using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Interfaces;
 using ProfilesApi.Infrastructure.Data;
 using ProfilesApi.Infrastructure.Repositories;
+using ProfilesApi.Infrastructure.Services;
 
 namespace ProfilesApi.Infrastructure;
 
@@ -23,6 +24,8 @@ public static class DependencyInjection
         services.AddScoped<IPhotoRepository, PhotoRepository>();
         services.AddScoped<ISpecializationRepository, SpecializationRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
         
         return services;
     }

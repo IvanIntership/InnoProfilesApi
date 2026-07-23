@@ -8,8 +8,10 @@ public class DoctorMappingProfile : Profile
 {
     public DoctorMappingProfile()
     {
-        CreateMap<Doctor, DoctorDto>();
+        CreateMap<Doctor, DoctorDto>()
+            .IncludeMembers(src => src.Account);
         CreateMap<CreateDoctorDto, Doctor>();
-        CreateMap<EditDoctorProfileDto, Doctor>();
+        CreateMap<EditDoctorProfileDto, Doctor>()
+            .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src));
     }
 }

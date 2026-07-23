@@ -18,7 +18,7 @@ public class Account : SoftDeletableEntity, IAuditable
     public virtual Photo? Photo { get; set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public Guid CreatedBy { get; init; }
+    public Guid CreatedBy { get; set; }
     public Guid UpdatedBy { get; set; }
     
     public Account(string firstname, string lastname, DateTime birthday, string phoneNumber,  string email, string passwordHash, Roles role, Guid createdBy, Guid updatedBy)
