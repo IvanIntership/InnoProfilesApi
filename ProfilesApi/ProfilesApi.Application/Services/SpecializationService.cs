@@ -13,10 +13,7 @@ public class SpecializationService : ISpecializationService
     private readonly IUnitOfWork _unitOfWork;
     
     public SpecializationService(IMapper mapper, 
-        IUnitOfWork unitOfWork,
-        IValidator<SearchQueryDto> searchQueryDtoValidator,
-        IValidator<CreateSpecializationDto> createSpecializationDtoValidator,
-        IValidator<EditSpecializationInformationDto> editSpecializationInformationDtoValidator)
+        IUnitOfWork unitOfWork)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

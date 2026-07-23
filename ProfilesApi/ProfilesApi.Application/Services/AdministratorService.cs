@@ -15,10 +15,7 @@ public class AdministratorService : IAdministratorService
     public AdministratorService(
         IMapper mapper, 
         IUnitOfWork unitOfWork, 
-        IPasswordHasher passwordHasher, 
-        IValidator<CreateAdministratorDto> createAdministratorDtoValidator, 
-        IValidator<EditAdministratorProfileDto> editAdministratorProfileDtoValidator, 
-        IValidator<SearchFilteredAdministratorListDto> searchFilteredAdministratorListDtoValidator)
+        IPasswordHasher passwordHasher)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

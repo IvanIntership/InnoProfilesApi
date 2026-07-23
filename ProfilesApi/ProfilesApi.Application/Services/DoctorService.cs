@@ -14,10 +14,7 @@ public class DoctorService : IDoctorService
     
     public DoctorService(IMapper mapper,
         IUnitOfWork unitOfWork, 
-        IPasswordHasher passwordHasher,
-        IValidator<CreateDoctorDto> createDoctorDtoValidator,
-        IValidator<EditDoctorProfileDto> editDoctorProfileDtoValidator,
-        IValidator<SearchFilteredDoctorListDto> searchFilteredDoctorListDtoValidator)
+        IPasswordHasher passwordHasher)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

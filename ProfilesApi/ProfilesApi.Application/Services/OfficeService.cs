@@ -13,10 +13,7 @@ public class OfficeService : IOfficeService
     private readonly IUnitOfWork _unitOfWork;
     
     public OfficeService(IMapper mapper,
-        IUnitOfWork unitOfWork,
-        IValidator<CreateOfficeDto> createOfficeDtoValidator,
-        IValidator<EditOfficeInformationDto> editOfficeInformationDtoValidator,
-        IValidator<SearchQueryDto> searchQueryDtoValidator)
+        IUnitOfWork unitOfWork)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
