@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using ProfilesApi.Application.Dto.Accounts;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Application.Mappings;
@@ -21,6 +20,8 @@ public static class DependencyInjection
         services.AddScoped<IPatientService, PatientService>();
         services.AddScoped<IPhotoService, PhotoService>();
         services.AddScoped<ISpecializationService, SpecializationService>();
+        
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
         
         return services;
     }

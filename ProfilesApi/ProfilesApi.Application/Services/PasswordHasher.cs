@@ -1,20 +1,33 @@
 ﻿using System.Security.Cryptography;
-using ProfilesApi.Application.Interfaces;
+using System.Text;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.Extensions.Configuration;
+using ProfilesApi.Application.Interfaces;
 
-namespace ProfilesApi.Infrastructure.Services;
+namespace ProfilesApi.Application.Services;
 
 public class PasswordHasher : IPasswordHasher
 {
+    private readonly byte[] _keyBytes;
+    
+    public PasswordHasher(IConfiguration configuration)
+    {
+        var pepper = configuration["PasswordSettings:Key"] 
+                     ?? throw new InvalidOperationException("Password Key secret is missing in configuration!");
+
+        _keyBytes = Encoding.UTF8.GetBytes(pepper);
+    }
     public string HashPassword(string password)
     {
         if (string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("Password cannot be empty.", nameof(password));
+        
+        byte[] keyPassword = HMACSHA256.HashData(_keyBytes, Encoding.UTF8.GetBytes(password));
 
         byte[] salt = RandomNumberGenerator.GetBytes(16);
 
         byte[] hash = KeyDerivation.Pbkdf2(
-            password: password,
+            password: Convert.ToBase64String(keyPassword),
             salt: salt,
             prf: KeyDerivationPrf.HMACSHA256,
             iterationCount: 600000,

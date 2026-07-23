@@ -14,6 +14,6 @@ public class SpecializationRepository : GenericRepository<Specialization>, ISpec
     public async Task<IEnumerable<Specialization>> SearchByTerm(string name, CancellationToken cancellationToken = default)
     {
         IQueryable<Specialization> query = Entities.AsQueryable();
-        return await query.Where(a => a.Name.Contains(name)).ToListAsync(cancellationToken);
+        return await query.Where(a => a.Name.ToLower().Contains(name)).ToListAsync(cancellationToken);
     }
 }

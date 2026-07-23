@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using ProfilesApi.Application.Dto.Doctors;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
@@ -10,24 +11,44 @@ public class DoctorService : IDoctorService
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IValidator<CreateDoctorDto> _createDoctorDtoValidator;
+    private readonly IValidator<EditDoctorProfileDto> _editDoctorProfileDtoValidator;
+    private readonly IValidator<SearchFilteredDoctorListDto> _searchFilteredDoctorListDtoValidator;
     
-    public DoctorService(IMapper mapper, IUnitOfWork unitOfWork, IPasswordHasher passwordHasher)
+    public DoctorService(IMapper mapper,
+        IUnitOfWork unitOfWork, 
+        IPasswordHasher passwordHasher,
+        IValidator<CreateDoctorDto> createDoctorDtoValidator,
+        IValidator<EditDoctorProfileDto> editDoctorProfileDtoValidator,
+        IValidator<SearchFilteredDoctorListDto> searchFilteredDoctorListDtoValidator)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
+        _createDoctorDtoValidator = createDoctorDtoValidator ?? throw new ArgumentNullException(nameof(createDoctorDtoValidator));
+        _editDoctorProfileDtoValidator = editDoctorProfileDtoValidator ?? throw new ArgumentNullException(nameof(editDoctorProfileDtoValidator));
+        _searchFilteredDoctorListDtoValidator = searchFilteredDoctorListDtoValidator ?? throw new ArgumentNullException(nameof(searchFilteredDoctorListDtoValidator));
     }
 
     public async Task<DoctorDto> CreateDoctorAsync(CreateDoctorDto createDoctorDto, Guid? createdById = null, CancellationToken ct = default)
     {
-        ArgumentNullException.ThrowIfNull(createDoctorDto);
-        
-        var emailExists = await _unitOfWork.Accounts.GetByEmail(createDoctorDto.Email, ct);
-        var numberExists = await _unitOfWork.Accounts.GetByPhoneNumber(createDoctorDto.PhoneNumber, ct);
-
-        if (emailExists != null || numberExists != null)
+        var validationResult = await _createDoctorDtoValidator.ValidateAsync(createDoctorDto, ct);
+        if (!validationResult.IsValid)
         {
-            throw new InvalidOperationException("Account already exists");
+            throw new ValidationException(validationResult.Errors);
+        }
+        
+        var emailExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Email == createDoctorDto.Email, ct);
+        var numberExists = await _unitOfWork.Accounts.ExistsAsync(a=> a.PhoneNumber == createDoctorDto.PhoneNumber, ct);
+
+        if (emailExists)
+        {
+            throw new InvalidOperationException("Email is already in use by another account.");
+        }
+
+        if (numberExists)
+        {
+            throw new InvalidOperationException("Phone number is already in use by another account.");
         }
         
         var officeExists = await _unitOfWork.Offices.ExistsAsync(o => o.Id == createDoctorDto.OfficeId, ct);
@@ -80,7 +101,11 @@ public class DoctorService : IDoctorService
     public async Task<DoctorDto> EditDoctorProfileAsync(EditDoctorProfileDto editDoctorProfileDto, Guid? editedById = null,
         CancellationToken ct = default)
     {
-        ArgumentNullException.ThrowIfNull(editDoctorProfileDto);
+        var validationResult = await _editDoctorProfileDtoValidator.ValidateAsync(editDoctorProfileDto, ct);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
         
         var doctor = await _unitOfWork.Doctors.GetWithDetailsAsync(editDoctorProfileDto.Id, ct);
 
@@ -116,7 +141,6 @@ public class DoctorService : IDoctorService
         }
 
         _mapper.Map(editDoctorProfileDto, doctor);
-        _mapper.Map(editDoctorProfileDto, doctor.Account);
 
         doctor.Account.UpdatedBy = editedById ?? doctor.Account.Id;
         
@@ -138,7 +162,16 @@ public class DoctorService : IDoctorService
 
     public async Task<IEnumerable<DoctorDto>> GetDoctorsAsync(SearchFilteredDoctorListDto? filteredDoctorListDto, CancellationToken ct = default)
     {
-        var searchTerm = filteredDoctorListDto?.SearchTerm?.Trim();
+        if (filteredDoctorListDto != null)
+        {
+            var validationResult = await _searchFilteredDoctorListDtoValidator.ValidateAsync(filteredDoctorListDto, ct);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+        }
+
+        var searchTerm = filteredDoctorListDto?.SearchTerm?.Trim().ToLower();
         var officeId = filteredDoctorListDto?.OfficeId;
         var specializationId = filteredDoctorListDto?.SpecializationId;
         var minExperienceInYears = filteredDoctorListDto?.MinExperienceYears;
@@ -153,10 +186,10 @@ public class DoctorService : IDoctorService
                 (!specializationId.HasValue || d.SpecializationId == specializationId.Value) &&
                 (!officeId.HasValue || d.OfficeId == officeId.Value) &&
                 (string.IsNullOrWhiteSpace(searchTerm) ||
-                 d.Account.Firstname.Contains(searchTerm) ||
-                 d.Account.Lastname.Contains(searchTerm) ||
-                 (d.Account.Firstname + " " + d.Account.Lastname).Contains(searchTerm) ||
-                 (d.Account.Lastname + " " + d.Account.Firstname).Contains(searchTerm)),
+                 d.Account.Firstname.ToLower().Contains(searchTerm) ||
+                 d.Account.Lastname.ToLower().Contains(searchTerm) ||
+                 (d.Account.Firstname + " " + d.Account.Lastname).ToLower().Contains(searchTerm) ||
+                 (d.Account.Lastname + " " + d.Account.Firstname).ToLower().Contains(searchTerm)),
 
             cancellationToken: ct,
 

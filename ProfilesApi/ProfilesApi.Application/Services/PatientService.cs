@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using ProfilesApi.Application.Dto.Patients;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
@@ -10,24 +11,44 @@ public class PatientService : IPatientService
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IValidator<RegisterPatientDto> _registerPatientDtoValidator;
+    private readonly IValidator<EditPatientProfileDto> _editPatientProfileDtoValidator;
+    private readonly IValidator<SearchFilteredPatientListDto> _searchFilteredPatientListDtoValidator;
     
-    public PatientService(IMapper mapper, IUnitOfWork unitOfWork, IPasswordHasher passwordHasher)
+    public PatientService(IMapper mapper, 
+        IUnitOfWork unitOfWork, 
+        IPasswordHasher passwordHasher,
+        IValidator <RegisterPatientDto> registerPatientDtoValidator,
+        IValidator <EditPatientProfileDto> editPatientProfileDtoValidator,
+        IValidator <SearchFilteredPatientListDto> searchFilteredPatientListDtoValidator)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
+        _registerPatientDtoValidator = registerPatientDtoValidator ?? throw new ArgumentNullException(nameof(registerPatientDtoValidator));
+        _editPatientProfileDtoValidator = editPatientProfileDtoValidator ?? throw new ArgumentNullException(nameof(editPatientProfileDtoValidator));
+        _searchFilteredPatientListDtoValidator =  searchFilteredPatientListDtoValidator ?? throw new ArgumentNullException(nameof(searchFilteredPatientListDtoValidator));
     }
 
     public async Task<PatientDto> CreatePatientAsync(RegisterPatientDto registerPatientDto, Guid? createdById = null, CancellationToken ct = default)
     {
-        ArgumentNullException.ThrowIfNull(registerPatientDto);
-        
-        var emailExists = await _unitOfWork.Accounts.GetByEmail(registerPatientDto.Email, ct);
-        var numberExists = await _unitOfWork.Accounts.GetByPhoneNumber(registerPatientDto.PhoneNumber, ct);
-
-        if (emailExists != null || numberExists != null)
+        var validationResult = await _registerPatientDtoValidator.ValidateAsync(registerPatientDto, ct);
+        if (!validationResult.IsValid)
         {
-            throw new InvalidOperationException("Account already exists");
+            throw new ValidationException(validationResult.Errors);
+        }
+        
+        var emailExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Email == registerPatientDto.Email, ct);
+        var numberExists = await _unitOfWork.Accounts.ExistsAsync(a=> a.PhoneNumber == registerPatientDto.PhoneNumber, ct);
+
+        if (emailExists)
+        {
+            throw new InvalidOperationException("Email is already in use by another account.");
+        }
+
+        if (numberExists)
+        {
+            throw new InvalidOperationException("Phone number is already in use by another account.");
         }
 
         var patient = _mapper.Map<Patient>(registerPatientDto);
@@ -63,7 +84,16 @@ public class PatientService : IPatientService
 
     public async Task<IEnumerable<PatientDto>> GetPatientsAsync(SearchFilteredPatientListDto? filteredPatientListDto, CancellationToken ct = default)
     {
-        var searchTerm = filteredPatientListDto?.SearchTerm?.Trim();
+        if (filteredPatientListDto != null)
+        {
+            var validationResult = await _searchFilteredPatientListDtoValidator.ValidateAsync(filteredPatientListDto, ct);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+        }
+
+        var searchTerm = filteredPatientListDto?.SearchTerm?.Trim().ToLower();
         var phoneNumber = filteredPatientListDto?.PhoneNumber?.Trim();
         var email = filteredPatientListDto?.Email?.Trim();
     
@@ -72,10 +102,10 @@ public class PatientService : IPatientService
                 (string.IsNullOrWhiteSpace(phoneNumber) || a.Account.PhoneNumber.Contains(phoneNumber)) &&
                 (string.IsNullOrWhiteSpace(email) || a.Account.Email.Contains(email)) &&
                 (string.IsNullOrWhiteSpace(searchTerm) ||
-                 a.Account.Firstname.Contains(searchTerm) ||
-                 a.Account.Lastname.Contains(searchTerm) ||
-                 (a.Account.Firstname + " " + a.Account.Lastname).Contains(searchTerm) ||
-                 (a.Account.Lastname + " " + a.Account.Firstname).Contains(searchTerm)),
+                 a.Account.Firstname.ToLower().Contains(searchTerm) ||
+                 a.Account.Lastname.ToLower().Contains(searchTerm) ||
+                 (a.Account.Firstname + " " + a.Account.Lastname).ToLower().Contains(searchTerm) ||
+                 (a.Account.Lastname + " " + a.Account.Firstname).ToLower().Contains(searchTerm)),
     
             cancellationToken: ct,
 
@@ -90,7 +120,11 @@ public class PatientService : IPatientService
 
     public async Task<PatientDto> EditPatientAsync(EditPatientProfileDto editPatientProfileDto, Guid? editdById = null, CancellationToken ct = default)
     {
-        ArgumentNullException.ThrowIfNull(editPatientProfileDto);
+        var validationResult = await _editPatientProfileDtoValidator.ValidateAsync(editPatientProfileDto, ct);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
         
         var patient = await _unitOfWork.Patients.GetWithDetailsAsync(editPatientProfileDto.Id, ct);
 
@@ -114,7 +148,6 @@ public class PatientService : IPatientService
         }
 
         _mapper.Map(editPatientProfileDto, patient);
-        _mapper.Map(editPatientProfileDto, patient.Account);
 
         patient.Account.UpdatedBy = editdById ?? patient.Account.Id;
         

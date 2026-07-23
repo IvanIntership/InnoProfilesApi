@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Dto.Specializations;
 using ProfilesApi.Application.Interfaces;
@@ -10,16 +11,30 @@ public class SpecializationService : ISpecializationService
 {
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IValidator<SearchQueryDto> _searchQueryDtoValidator;
+    private readonly IValidator<CreateSpecializationDto> _createSpecializationDtoValidator;
+    private readonly IValidator<EditSpecializationInformationDto> _editSpecializationInformationDtoValidator;
     
-    public SpecializationService(IMapper mapper, IUnitOfWork unitOfWork)
+    public SpecializationService(IMapper mapper, 
+        IUnitOfWork unitOfWork,
+        IValidator<SearchQueryDto> searchQueryDtoValidator,
+        IValidator<CreateSpecializationDto> createSpecializationDtoValidator,
+        IValidator<EditSpecializationInformationDto> editSpecializationInformationDtoValidator)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _searchQueryDtoValidator = searchQueryDtoValidator ?? throw new ArgumentNullException(nameof(searchQueryDtoValidator));
+        _createSpecializationDtoValidator = createSpecializationDtoValidator ?? throw new ArgumentNullException(nameof(createSpecializationDtoValidator));
+        _editSpecializationInformationDtoValidator = editSpecializationInformationDtoValidator ?? throw new ArgumentNullException(nameof(editSpecializationInformationDtoValidator));
     }
 
     public async Task<SpecializationDto> CreateSpecializationAsync(CreateSpecializationDto createSpecializationDto, CancellationToken ct = default)
     {
-        ArgumentNullException.ThrowIfNull(createSpecializationDto);
+        var validationResult = await _createSpecializationDtoValidator.ValidateAsync(createSpecializationDto, ct);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
         
         var specialization = _mapper.Map<Specialization>(createSpecializationDto);
 
@@ -40,7 +55,16 @@ public class SpecializationService : ISpecializationService
         SearchQueryDto? searchQueryDto = null, 
         CancellationToken ct = default)
     {
-        var searchTerm = searchQueryDto?.SearchTerm?.Trim();
+        if (searchQueryDto != null)
+        {
+            var validationResult = await _searchQueryDtoValidator.ValidateAsync(searchQueryDto, ct);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
+        }
+
+        var searchTerm = searchQueryDto?.SearchTerm?.Trim().ToLower();
 
         IEnumerable<Specialization> specializations;
 
@@ -91,6 +115,12 @@ public class SpecializationService : ISpecializationService
     public async Task EditSpecializationAsync(EditSpecializationInformationDto editSpecializationInformationDto,
         CancellationToken ct = default)
     {
+        var validationResult = await _editSpecializationInformationDtoValidator.ValidateAsync(editSpecializationInformationDto, ct);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
+        
         var existingSpecialization = await _unitOfWork.Specializations.GetByIdAsync(editSpecializationInformationDto.Id, ct);
         
         if (existingSpecialization == null)

@@ -11,7 +11,7 @@ public class AccountRepository : GenericRepository<Account>, IAccountRepository
     {
     }
 
-    public async Task<IEnumerable<Account>> SearchByTerm(string name, CancellationToken cancellationToken = default) //remove
+    public async Task<IEnumerable<Account>> SearchByTerm(string name, CancellationToken cancellationToken = default)
     {
         IQueryable<Account> query = Entities.AsQueryable();
         query = query.Where(a => a.Firstname.Contains(name) || 
@@ -21,7 +21,7 @@ public class AccountRepository : GenericRepository<Account>, IAccountRepository
         return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<Account?> GetWithDetailsAsync(Guid accountId, CancellationToken cancellationToken = default) //remove
+    public async Task<Account?> GetWithDetailsAsync(Guid accountId, CancellationToken cancellationToken = default)
     {
         return await Entities
             .Include(a => a.Photo)
@@ -42,7 +42,7 @@ public class AccountRepository : GenericRepository<Account>, IAccountRepository
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Account>> GetByName(string name, CancellationToken cancellationToken = default) //remove
+    public async Task<IEnumerable<Account>> GetByName(string name, CancellationToken cancellationToken = default)
     {
         IQueryable<Account> query = Entities.AsQueryable();
         query = query.Where(a => a.Firstname == (name) || 

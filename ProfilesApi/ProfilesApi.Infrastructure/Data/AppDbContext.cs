@@ -18,18 +18,30 @@ public class AppDbContext : DbContext
     public DbSet<Photo> Photos { get; set; }
     public DbSet<Specialization> Specializations { get; set; }
 
+    public override int SaveChanges()
+    {
+        UpdateEntitiesBeforeSave();
+        return base.SaveChanges();
+    }
+    
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         UpdateEntitiesBeforeSave();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
-    public override async Task<int> SaveChangesAsync(
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        UpdateEntitiesBeforeSave();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    public override Task<int> SaveChangesAsync(
         bool acceptAllChangesOnSuccess, 
         CancellationToken cancellationToken = default)
     {
         UpdateEntitiesBeforeSave();
-        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

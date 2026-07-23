@@ -25,7 +25,6 @@ public static class DependencyInjection
         services.AddScoped<ISpecializationRepository, SpecializationRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
-        services.AddTransient<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
         
         return services;
