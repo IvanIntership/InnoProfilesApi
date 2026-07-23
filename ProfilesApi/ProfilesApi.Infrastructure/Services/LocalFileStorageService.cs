@@ -29,7 +29,7 @@ public class LocalFileStorageService : IFileStorageService
         var uniqueFileName = $"{Guid.NewGuid()}{extension}";
         var fullPath = Path.Combine(_currentDirectory, uniqueFileName);
 
-        await using var destinationStream = File.Create(fullPath);
+        using var destinationStream = File.Create(fullPath);
         await fileStream.CopyToAsync(destinationStream, ct);
 
         return $"/photos/{uniqueFileName}";

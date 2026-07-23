@@ -11,9 +11,6 @@ public class AdministratorService : IAdministratorService
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IValidator<CreateAdministratorDto> _createAdministratorDtoValidator;
-    private readonly IValidator<EditAdministratorProfileDto> _editAdministratorProfileDtoValidator;
-    private readonly IValidator<SearchFilteredAdministratorListDto> _searchFilteredAdministratorListDtoValidator;
 
     public AdministratorService(
         IMapper mapper, 
@@ -26,20 +23,11 @@ public class AdministratorService : IAdministratorService
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
-        _editAdministratorProfileDtoValidator = editAdministratorProfileDtoValidator ?? throw new ArgumentNullException(nameof(editAdministratorProfileDtoValidator));
-        _createAdministratorDtoValidator = createAdministratorDtoValidator ?? throw new ArgumentNullException(nameof(createAdministratorDtoValidator));
-        _searchFilteredAdministratorListDtoValidator = searchFilteredAdministratorListDtoValidator ?? throw new ArgumentNullException(nameof(searchFilteredAdministratorListDtoValidator));
     }
 
     public async Task<AdministratorDto> CreateAdministratorAsync(CreateAdministratorDto createAdministratorDto, Guid createdById,
         CancellationToken ct = default)
     {
-        var validationResult = await _createAdministratorDtoValidator.ValidateAsync(createAdministratorDto, ct);
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
-        
         var emailExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Email == createAdministratorDto.Email, ct);
         var numberExists = await _unitOfWork.Accounts.ExistsAsync(a=> a.PhoneNumber == createAdministratorDto.PhoneNumber, ct);
 
@@ -101,12 +89,6 @@ public class AdministratorService : IAdministratorService
     public async Task<AdministratorDto> EditAdministratorProfileAsync(EditAdministratorProfileDto editAdministratorProfileDto, Guid editedById,
         CancellationToken ct = default)
     {
-        var validationResult = await _editAdministratorProfileDtoValidator.ValidateAsync(editAdministratorProfileDto, ct);
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
-        
         var administrator = await _unitOfWork.Administrators.GetWithDetailsAsync(editAdministratorProfileDto.Id, ct);
 
         if (administrator == null)
@@ -134,7 +116,7 @@ public class AdministratorService : IAdministratorService
             throw new InvalidOperationException("Email is already in use by another account.");
         }
 
-        _mapper.Map(editAdministratorProfileDto, administrator);
+        administrator = _mapper.Map<Administrator>(editAdministratorProfileDto);
 
         administrator.Account.UpdatedBy = editedById;
         
@@ -158,15 +140,6 @@ public class AdministratorService : IAdministratorService
         SearchFilteredAdministratorListDto? filteredAdministratorListDto,
         CancellationToken ct = default)
     {
-        if (filteredAdministratorListDto != null)
-        {
-            var validationResult = await _searchFilteredAdministratorListDtoValidator.ValidateAsync(filteredAdministratorListDto, ct);
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult.Errors);
-            }
-        }
-
         var searchTerm = filteredAdministratorListDto?.SearchTerm?.Trim().ToLower();
         var officeId = filteredAdministratorListDto?.OfficeId;
     

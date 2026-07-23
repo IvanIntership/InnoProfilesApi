@@ -11,9 +11,6 @@ public class OfficeService : IOfficeService
 {
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IValidator<CreateOfficeDto> _createOfficeDtoValidator;
-    private readonly IValidator<EditOfficeInformationDto> _editOfficeInformationDtoValidator;
-    private readonly IValidator<SearchQueryDto> _searchQueryDtoValidator;
     
     public OfficeService(IMapper mapper,
         IUnitOfWork unitOfWork,
@@ -23,19 +20,10 @@ public class OfficeService : IOfficeService
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _createOfficeDtoValidator = createOfficeDtoValidator ?? throw new ArgumentNullException(nameof(createOfficeDtoValidator));
-        _editOfficeInformationDtoValidator = editOfficeInformationDtoValidator ?? throw new ArgumentNullException(nameof(editOfficeInformationDtoValidator));
-        _searchQueryDtoValidator = searchQueryDtoValidator ?? throw new ArgumentNullException(nameof(searchQueryDtoValidator));
     }
 
     public async Task<OfficeDto> CreateOfficeAsync(CreateOfficeDto createOfficeDto, CancellationToken ct = default)
     {
-        var validationResult = await _createOfficeDtoValidator.ValidateAsync(createOfficeDto, ct);
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
-        
         var office = _mapper.Map<Office>(createOfficeDto);
         
         var alreadyExists = await _unitOfWork.Offices.ExistsAsync(o => o.Address.ToLower() == createOfficeDto.Address.ToLower() || o.PhoneNumber == createOfficeDto.PhoneNumber, ct);
@@ -53,15 +41,6 @@ public class OfficeService : IOfficeService
 
     public async Task<IEnumerable<OfficeDto>> GetOfficeListAsync(SearchQueryDto? searchQueryDto, CancellationToken ct = default)
     {
-        if (searchQueryDto != null)
-        {
-            var validationResult = await _searchQueryDtoValidator.ValidateAsync(searchQueryDto, ct);
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult.Errors);
-            }
-        }
-
         var searchQuery = searchQueryDto?.SearchTerm.Trim().ToLower();
         
         var filteredOffices = await _unitOfWork.Offices.GetAllAsync(o => string.IsNullOrEmpty(searchQuery) 
@@ -106,12 +85,6 @@ public class OfficeService : IOfficeService
 
     public async Task EditOfficeAsync(EditOfficeInformationDto editOfficeInformationDto, CancellationToken ct = default)
     {
-        var validationResult = await _editOfficeInformationDtoValidator.ValidateAsync(editOfficeInformationDto, ct);
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
-        
         var existingOffice = await _unitOfWork.Offices.GetByIdAsync(editOfficeInformationDto.Id, ct);
         
         if (existingOffice == null)
