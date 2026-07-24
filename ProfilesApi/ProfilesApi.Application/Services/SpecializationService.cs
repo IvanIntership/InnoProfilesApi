@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using FluentValidation;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Dto.Specializations;
 using ProfilesApi.Application.Interfaces;

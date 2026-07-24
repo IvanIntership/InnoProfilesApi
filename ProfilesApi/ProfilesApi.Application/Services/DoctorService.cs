@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using FluentValidation;
 using ProfilesApi.Application.Dto.Doctors;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
