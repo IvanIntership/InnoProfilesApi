@@ -26,7 +26,7 @@ public class SpecializationsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Specialization was created successfully", typeof(SpecializationDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> CreateSpecialization(CreateSpecializationDto createSpecializationDto, CancellationToken ct = default)
+    public async Task<IActionResult> CreateSpecialization([FromBody] CreateSpecializationDto createSpecializationDto, CancellationToken ct = default)
     {
         var result = await _specializationService.CreateSpecializationAsync(createSpecializationDto, ct);
         return Created($"/specializations/{result.Id}", result);
@@ -40,7 +40,7 @@ public class SpecializationsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Specialization was successfully deleted")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> DeleteSpecialization(Guid id, CancellationToken ct = default)
+    public async Task<IActionResult> DeleteSpecialization([FromRoute] Guid id, CancellationToken ct = default)
     {
         await _specializationService.DeleteSpecializationAsync(id, ct);
         return NoContent();
@@ -54,7 +54,7 @@ public class SpecializationsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Specialization was successfully edited")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> EditSpecialization(EditSpecializationInformationDto editSpecializationInformationDto, CancellationToken ct = default)
+    public async Task<IActionResult> EditSpecialization([FromBody] EditSpecializationInformationDto editSpecializationInformationDto, CancellationToken ct = default)
     {
         await _specializationService.EditSpecializationAsync(editSpecializationInformationDto, ct);
         return NoContent();
@@ -68,13 +68,13 @@ public class SpecializationsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Specialization retrieved successfully", typeof(SpecializationDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> GetSpecialization(Guid specializationId, CancellationToken ct = default)
+    public async Task<IActionResult> GetSpecialization([FromRoute] Guid specializationId, CancellationToken ct = default)
     {
         var specialization = await _specializationService.GetSpecializationByIdAsync(specializationId, ct);
         return Ok(specialization);
     }
 
-    [HttpGet]
+    [HttpPost]
     [SwaggerOperation(
         Summary = "Gets a list of specializations",
         Description = "Retrieves a paginated and filtered list of specializations based on search parameters.",
@@ -83,7 +83,7 @@ public class SpecializationsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "List of specializations retrieved successfully", typeof(IEnumerable<SpecializationDto>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetSpecializations(
-        [FromQuery] SearchQueryDto filteredSpecializationListDto, CancellationToken ct = default)
+        [FromBody] SearchQueryDto filteredSpecializationListDto, CancellationToken ct = default)
     {
         var specializations = await _specializationService.GetSpecializationsAsync(filteredSpecializationListDto, ct);
         return Ok(specializations);

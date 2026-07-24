@@ -26,7 +26,7 @@ public class DoctorsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Doctor was created successfully", typeof(DoctorDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> CreateDoctor(CreateDoctorDto createDoctorDto,
+    public async Task<IActionResult> CreateDoctor([FromBody] CreateDoctorDto createDoctorDto,
         [FromHeader(Name = "X-User-Id")] Guid createdById, CancellationToken ct = default)
     {
         var result = await _doctorService.CreateDoctorAsync(createDoctorDto, createdById, ct);
@@ -41,14 +41,13 @@ public class DoctorsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Doctor was successfully deleted")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> DeleteDoctor(Guid id, CancellationToken ct = default)
+    public async Task<IActionResult> DeleteDoctor([FromRoute] Guid id, CancellationToken ct = default)
     {
         await _doctorService.DeleteDoctorAsync(id, ct);
         return NoContent();
     }
     
     [HttpPut]
-    
     [SwaggerOperation(
         Summary = "Edits an doctor profile",
         Description = "Edits system doctor specified details. Requires the acting user's ID in the request header",
@@ -56,7 +55,7 @@ public class DoctorsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Doctor was successfully edited", typeof(DoctorDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> EditDoctorProfile(EditDoctorProfileDto editDoctorProfileDto,
+    public async Task<IActionResult> EditDoctorProfile([FromBody] EditDoctorProfileDto editDoctorProfileDto,
         [FromHeader(Name = "X-User-Id")] Guid editedById, CancellationToken ct = default)
     {
         var editedDoctor = await _doctorService.EditDoctorProfileAsync(editDoctorProfileDto, editedById, ct);
@@ -71,7 +70,7 @@ public class DoctorsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Doctor retrieved successfully", typeof(DoctorDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> GetDoctor(Guid doctorId, CancellationToken ct = default)
+    public async Task<IActionResult> GetDoctor([FromRoute] Guid doctorId, CancellationToken ct = default)
     {
         var doctor = await _doctorService.GetDoctorAsync(doctorId, ct);
         return Ok(doctor);
@@ -85,13 +84,13 @@ public class DoctorsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Doctor retrieved successfully", typeof(DoctorDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> GetByAccountId(Guid accountId, CancellationToken ct = default)
+    public async Task<IActionResult> GetByAccountId([FromRoute] Guid accountId, CancellationToken ct = default)
     {
         var doctor = await _doctorService.GetByAccountIdAsync(accountId, ct);
         return Ok(doctor);
     }
 
-    [HttpGet]
+    [HttpPost]
     [SwaggerOperation(
         Summary = "Gets a list of doctors",
         Description = "Retrieves a paginated and filtered list of doctors based on search parameters.",
@@ -100,7 +99,7 @@ public class DoctorsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "List of Doctors retrieved successfully", typeof(IEnumerable<DoctorDto>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetDoctors(
-        [FromQuery] SearchFilteredDoctorListDto filteredDoctorListDto, CancellationToken ct = default)
+        [FromBody] SearchFilteredDoctorListDto filteredDoctorListDto, CancellationToken ct = default)
     {
         var doctors = await _doctorService.GetDoctorsAsync(filteredDoctorListDto, ct);
         return Ok(doctors);

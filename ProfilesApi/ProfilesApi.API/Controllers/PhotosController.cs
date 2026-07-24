@@ -25,7 +25,7 @@ public class PhotosController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Photo was successfully deleted")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> DeletePhoto(Guid photoId, CancellationToken ct = default)
+    public async Task<IActionResult> DeletePhoto([FromRoute] Guid photoId, CancellationToken ct = default)
     {
         await _photoService.DeletePhotoAsync(photoId, ct);
         return NoContent();
@@ -39,7 +39,7 @@ public class PhotosController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Photo retrieved successfully", typeof(PhotoDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> GetPhoto(Guid photoId, CancellationToken ct = default)
+    public async Task<IActionResult> GetPhoto([FromRoute] Guid photoId, CancellationToken ct = default)
     {
         var photo = await _photoService.GetPhotoAsync(photoId, ct);
         return Ok(photo);
@@ -53,7 +53,7 @@ public class PhotosController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Photo was uploaded successfully", typeof(PhotoDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> UploadPhoto(IFormFile file, CancellationToken ct)
+    public async Task<IActionResult> UploadPhoto([FromForm] IFormFile file, CancellationToken ct)
     { 
         using var stream = file.OpenReadStream();
 

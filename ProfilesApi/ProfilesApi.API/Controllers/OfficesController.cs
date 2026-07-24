@@ -26,7 +26,7 @@ public class OfficesController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Office was created successfully", typeof(OfficeDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> CreateOffice(CreateOfficeDto createOfficeDto, CancellationToken ct = default)
+    public async Task<IActionResult> CreateOffice([FromBody] CreateOfficeDto createOfficeDto, CancellationToken ct = default)
     {
         var result = await _officeService.CreateOfficeAsync(createOfficeDto, ct);
         return Created($"/offices/{result.Id}", result);
@@ -40,7 +40,7 @@ public class OfficesController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Office was successfully deleted")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> DeleteOffice(Guid id, CancellationToken ct = default)
+    public async Task<IActionResult> DeleteOffice([FromRoute] Guid id, CancellationToken ct = default)
     {
         await _officeService.DeleteOfficeAsync(id, ct);
         return NoContent();
@@ -54,7 +54,7 @@ public class OfficesController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Office was successfully edited")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> EditOffice(EditOfficeInformationDto editOfficeInformationDto, CancellationToken ct = default)
+    public async Task<IActionResult> EditOffice([FromBody] EditOfficeInformationDto editOfficeInformationDto, CancellationToken ct = default)
     {
         await _officeService.EditOfficeAsync(editOfficeInformationDto, ct);
         return NoContent();
@@ -68,13 +68,13 @@ public class OfficesController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Office retrieved successfully", typeof(OfficeDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> GetOffice(Guid officeId, CancellationToken ct = default)
+    public async Task<IActionResult> GetOffice([FromRoute] Guid officeId, CancellationToken ct = default)
     {
         var office = await _officeService.GetOfficeByIdAsync(officeId, ct);
         return Ok(office);
     }
 
-    [HttpGet]
+    [HttpPost]
     [SwaggerOperation(
         Summary = "Gets a list of offices",
         Description = "Retrieves a paginated and filtered list of offices based on search parameters.",
@@ -83,7 +83,7 @@ public class OfficesController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "List of offices retrieved successfully", typeof(IEnumerable<OfficeDto>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetOffices(
-        [FromQuery] SearchQueryDto filteredOfficeListDto, CancellationToken ct = default)
+        [FromBody] SearchQueryDto filteredOfficeListDto, CancellationToken ct = default)
     {
         var offices = await _officeService.GetOfficeListAsync(filteredOfficeListDto, ct);
         return Ok(offices);

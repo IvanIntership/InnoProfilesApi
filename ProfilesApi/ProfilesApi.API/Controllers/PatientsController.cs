@@ -25,7 +25,7 @@ public class PatientsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Patient was created successfully", typeof(PatientDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> CreatePatient(RegisterPatientDto registerPatientDto,
+    public async Task<IActionResult> CreatePatient([FromBody] RegisterPatientDto registerPatientDto,
         [FromHeader(Name = "X-User-Id")] Guid createdById, CancellationToken ct = default)
     {
         var result = await _patientService.CreatePatientAsync(registerPatientDto, createdById, ct);
@@ -40,7 +40,7 @@ public class PatientsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Patient was successfully deleted")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> DeletePatient(Guid id, CancellationToken ct = default)
+    public async Task<IActionResult> DeletePatient([FromRoute] Guid id, CancellationToken ct = default)
     {
         await _patientService.DeletePatientAsync(id, ct);
         return NoContent();
@@ -54,7 +54,7 @@ public class PatientsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Patient was successfully edited", typeof(PatientDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> EditPatientProfile(EditPatientProfileDto editPatientProfileDto,
+    public async Task<IActionResult> EditPatientProfile([FromBody] EditPatientProfileDto editPatientProfileDto,
         [FromHeader(Name = "X-User-Id")] Guid editedById, CancellationToken ct = default)
     {
         var editedPatient = await _patientService.EditPatientAsync(editPatientProfileDto, editedById, ct);
@@ -69,7 +69,7 @@ public class PatientsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Patient retrieved successfully", typeof(PatientDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> GetPatient(Guid patientId, CancellationToken ct = default)
+    public async Task<IActionResult> GetPatient([FromRoute] Guid patientId, CancellationToken ct = default)
     {
         var patient = await _patientService.GetPatientAsync(patientId, ct);
         return Ok(patient);
@@ -83,13 +83,13 @@ public class PatientsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Patient retrieved successfully", typeof(PatientDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> GetByAccountId(Guid accountId, CancellationToken ct = default)
+    public async Task<IActionResult> GetByAccountId([FromRoute] Guid accountId, CancellationToken ct = default)
     {
         var patient = await _patientService.GetByAccountIdAsync(accountId, ct);
         return Ok(patient);
     }
 
-    [HttpGet]
+    [HttpPost]
     [SwaggerOperation(
         Summary = "Gets a list of patients",
         Description = "Retrieves a paginated and filtered list of patients based on search parameters.",
@@ -98,7 +98,7 @@ public class PatientsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "List of patients retrieved successfully", typeof(IEnumerable<PatientDto>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetPatients(
-        [FromQuery] SearchFilteredPatientListDto filteredPatientListDto, CancellationToken ct = default)
+        [FromBody] SearchFilteredPatientListDto filteredPatientListDto, CancellationToken ct = default)
     {
         var patients = await _patientService.GetPatientsAsync(filteredPatientListDto, ct);
         return Ok(patients);

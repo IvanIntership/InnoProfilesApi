@@ -25,7 +25,7 @@ public class AdministratorsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Administrator was created successfully", typeof(AdministratorDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> CreateAdministrator(CreateAdministratorDto createAdministratorDto,
+    public async Task<IActionResult> CreateAdministrator([FromBody] CreateAdministratorDto createAdministratorDto,
         [FromHeader(Name = "X-User-Id")] Guid createdById, CancellationToken ct = default)
     {
         var result = await _administratorService.CreateAdministratorAsync(createAdministratorDto, createdById, ct);
@@ -40,7 +40,7 @@ public class AdministratorsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Administrator was successfully deleted")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> DeleteAdministrator(Guid id, CancellationToken ct = default)
+    public async Task<IActionResult> DeleteAdministrator([FromRoute] Guid id, CancellationToken ct = default)
     {
         await _administratorService.DeleteAdministratorAsync(id, ct);
         return NoContent();
@@ -54,7 +54,7 @@ public class AdministratorsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Administrator was successfully edited", typeof(AdministratorDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> EditAdministratorProfile(EditAdministratorProfileDto editAdministratorProfileDto,
+    public async Task<IActionResult> EditAdministratorProfile([FromBody] EditAdministratorProfileDto editAdministratorProfileDto,
         [FromHeader(Name = "X-User-Id")] Guid editedById, CancellationToken ct = default)
     {
         var editedAdministrator = await _administratorService.EditAdministratorProfileAsync(editAdministratorProfileDto, editedById, ct);
@@ -69,7 +69,7 @@ public class AdministratorsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Administrator retrieved successfully", typeof(AdministratorDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> GetAdministrator(Guid administratorId, CancellationToken ct = default)
+    public async Task<IActionResult> GetAdministrator([FromRoute] Guid administratorId, CancellationToken ct = default)
     {
         var administrator = await _administratorService.GetAdministratorAsync(administratorId, ct);
         return Ok(administrator);
@@ -83,13 +83,13 @@ public class AdministratorsController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Administrator retrieved successfully", typeof(AdministratorDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> GetByAccountId(Guid accountId, CancellationToken ct = default)
+    public async Task<IActionResult> GetByAccountId([FromRoute] Guid accountId, CancellationToken ct = default)
     {
         var administrator = await _administratorService.GetByAccountIdAsync(accountId, ct);
         return Ok(administrator);
     }
 
-    [HttpGet]
+    [HttpPost]
     [SwaggerOperation(
         Summary = "Gets a list of administrators",
         Description = "Retrieves a paginated and filtered list of administrators based on search parameters.",
@@ -98,7 +98,7 @@ public class AdministratorsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "List of administrators retrieved successfully", typeof(IEnumerable<AdministratorDto>))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetAdministrators(
-        [FromQuery] SearchFilteredAdministratorListDto filteredAdministratorListDto, CancellationToken ct = default)
+        [FromBody] SearchFilteredAdministratorListDto filteredAdministratorListDto, CancellationToken ct = default)
     {
         var administrators = await _administratorService.GetAdministratorsAsync(filteredAdministratorListDto, ct);
         return Ok(administrators);
