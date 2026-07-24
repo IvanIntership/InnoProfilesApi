@@ -2,7 +2,6 @@
 using ProfilesApi.Application.Dto.Photos;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
-using ProfilesApi.Domain.Interfaces;
 
 namespace ProfilesApi.Application.Services;
 
@@ -46,5 +45,26 @@ public class PhotoService : IPhotoService
 
         _unitOfWork.Photos.Delete(photo);
         await _unitOfWork.CompleteAsync(ct);
+    }
+    
+    public async Task<(Stream Stream, string ContentType)> GetPhotoAsync(Guid photoId, CancellationToken ct = default)
+    {
+        var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
+        if (photo == null)
+        {
+            throw new KeyNotFoundException($"Photo with ID '{photoId}' was not found.");
+        }
+
+        var fileName = Path.GetFileName(photo.Url);
+        
+        if (string.IsNullOrWhiteSpace(fileName)) throw new KeyNotFoundException($"Photo with ID '{photoId}' was not found.");
+
+        var fileResult = await _fileStorageService.GetPhotoAsync(fileName, ct);
+        if (fileResult == null)
+        {
+            throw new KeyNotFoundException($"Physical file for photo ID '{photoId}' was not found on storage.");
+        }
+
+        return fileResult.Value;
     }
 }
