@@ -12,7 +12,6 @@ public record AdministratorDto
     public string PhoneNumber { get; init; }
     public string Email { get; init; }
     public Roles Role { get; init; }
-    public string? PhotoUrl { get; init; }
     public Guid? PhotoId { get; init; }
     public Guid OfficeId { get; init; }
     public int TotalExperience { get; init; }

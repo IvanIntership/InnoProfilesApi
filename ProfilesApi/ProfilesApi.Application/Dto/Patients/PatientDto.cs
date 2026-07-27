@@ -12,6 +12,5 @@ public record PatientDto
     public string PhoneNumber { get; init; }
     public string Email { get; init; }
     public Roles Role { get; init; }
-    public string? PhotoUrl { get; init; }
     public Guid? PhotoId { get; init; }
 }

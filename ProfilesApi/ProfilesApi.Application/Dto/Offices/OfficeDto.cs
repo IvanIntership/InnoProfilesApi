@@ -6,5 +6,4 @@ public record OfficeDto
     public string Address { get; init; }
     public string PhoneNumber { get; init; }
     public Guid? PhotoId { get; init; }
-    public string? PhotoUrl { get; init; }
 }
