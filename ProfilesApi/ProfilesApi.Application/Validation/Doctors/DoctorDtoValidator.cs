@@ -13,7 +13,6 @@ public class DoctorDtoValidator : AbstractValidator<DoctorDto>
         RuleFor(x => x.Birthday).BirthdayRules();
         RuleFor(x => x.PhoneNumber).PhoneNumberRules();
         RuleFor(x => x.Email).EmailRules();
-        RuleFor(x => x.Password).PasswordRules();
         RuleFor(x => x.AccountId).NotEmpty().WithMessage("Account ID is required.");
         
         RuleFor(x => x.Id).NotEmpty();
