@@ -12,5 +12,6 @@ public class PatientMappingProfile : Profile
             .IncludeMembers(src => src.Account);
         CreateMap<EditPatientProfileDto, Patient>()
             .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src));
+        CreateMap<RegisterPatientDto, Patient>();
     }
 }

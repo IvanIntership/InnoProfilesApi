@@ -12,7 +12,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblyContaining<AccountDto>();
-        services.AddAutoMapper(typeof(AccountMappingProfile).Assembly);
+        services.AddAutoMapper(cfg => cfg.AddMaps(typeof(AccountMappingProfile).Assembly));
         
         services.AddScoped<IAdministratorService, AdministratorService>();
         services.AddScoped<IDoctorService, DoctorService>();

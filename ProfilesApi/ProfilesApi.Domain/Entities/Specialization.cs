@@ -10,4 +10,5 @@ public class Specialization : BaseEntity
     {
         Name = name;
     }
+    protected Specialization() { }
 }

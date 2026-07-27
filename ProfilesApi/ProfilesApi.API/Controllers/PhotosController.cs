@@ -7,7 +7,6 @@ namespace ProfilesApi.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[Consumes("application/json")]
 public class PhotosController : ControllerBase
 {
     private readonly IPhotoService _photoService;
@@ -18,6 +17,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpDelete("{photoId:guid}")]
+    [Consumes("application/json")]
     [SwaggerOperation(
         Summary = "Deletes a photo",
         Description = "Permanently removes a photo by its unique identifier.",
@@ -32,6 +32,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpGet("{photoId:guid}")]
+    [Consumes("application/json")]
     [SwaggerOperation(
         Summary = "Gets a photo by ID",
         Description = "Retrieves detailed information for a specific photo using its unique identifier.",
@@ -42,10 +43,11 @@ public class PhotosController : ControllerBase
     public async Task<IActionResult> GetPhoto([FromRoute] Guid photoId, CancellationToken ct = default)
     {
         var photo = await _photoService.GetPhotoAsync(photoId, ct);
-        return Ok(photo);
+        return File(photo.Stream, photo.ContentType);
     }
     
     [HttpPost]
+    [Consumes("multipart/form-data")]
     [SwaggerOperation(
         Summary = "Uploads a photo",
         Description = "Uploads a new photo file to the system.",
@@ -53,7 +55,7 @@ public class PhotosController : ControllerBase
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Photo was uploaded successfully", typeof(PhotoDto))]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> UploadPhoto([FromForm] IFormFile file, CancellationToken ct)
+    public async Task<IActionResult> UploadPhoto(IFormFile file, CancellationToken ct)
     { 
         using var stream = file.OpenReadStream();
 

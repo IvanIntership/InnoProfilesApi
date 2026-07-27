@@ -26,8 +26,8 @@ public class PhotoService : IPhotoService
 
         _unitOfWork.Photos.Add(photo);
         await _unitOfWork.CompleteAsync(ct);
-
-        return new PhotoDto(photo.Id, photoUrl);
+        
+        return _mapper.Map<PhotoDto>(photo);
     }
 
     public async Task DeletePhotoAsync(Guid photoId, CancellationToken ct = default)

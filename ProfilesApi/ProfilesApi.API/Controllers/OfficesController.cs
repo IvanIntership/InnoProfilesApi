@@ -74,7 +74,7 @@ public class OfficesController : ControllerBase
         return Ok(office);
     }
 
-    [HttpPost]
+    [HttpPost("search")]
     [SwaggerOperation(
         Summary = "Gets a list of offices",
         Description = "Retrieves a paginated and filtered list of offices based on search parameters.",

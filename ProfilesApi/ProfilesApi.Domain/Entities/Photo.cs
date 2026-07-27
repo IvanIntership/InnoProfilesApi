@@ -10,4 +10,5 @@ public class Photo : BaseEntity
     {
         Url = url;
     }
+    protected Photo() { }
 }

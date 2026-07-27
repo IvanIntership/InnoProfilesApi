@@ -1,3 +1,6 @@
 ﻿namespace ProfilesApi.Application.Dto.Shared;
 
-public record SearchQueryDto(string SearchTerm);
+public record SearchQueryDto
+{
+    public string SearchTerm { get; init; }
+}

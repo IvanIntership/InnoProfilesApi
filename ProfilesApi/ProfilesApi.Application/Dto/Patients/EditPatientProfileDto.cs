@@ -1,10 +1,12 @@
 ﻿namespace ProfilesApi.Application.Dto.Patients;
 
-public record EditPatientProfileDto(
-    Guid Id,
-    string Firstname,
-    string Lastname,
-    DateTime Birthday,
-    string PhoneNumber,
-    string Email,
-    Guid? PhotoId);
+public record EditPatientProfileDto
+{
+    public Guid Id { get; init; }
+    public string Firstname { get; init; }
+    public string Lastname { get; init; }
+    public DateTime Birthday { get; init; }
+    public string PhoneNumber { get; init; }
+    public string Email { get; init; }
+    public Guid? PhotoId { get; init; }
+}

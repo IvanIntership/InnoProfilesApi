@@ -31,4 +31,5 @@ public class Administrator : SoftDeletableEntity
         CareerStartDate = careerStartDate;
         GapInMonths = gapInMonths;
     }
+    protected Administrator() { }
 }

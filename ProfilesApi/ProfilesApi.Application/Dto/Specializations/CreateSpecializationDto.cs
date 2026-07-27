@@ -1,3 +1,6 @@
 ﻿namespace ProfilesApi.Application.Dto.Specializations;
 
-public record CreateSpecializationDto(string Name);
+public record CreateSpecializationDto
+{
+    public string Name { get; init; }
+}

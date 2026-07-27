@@ -89,7 +89,7 @@ public class AdministratorsController : ControllerBase
         return Ok(administrator);
     }
 
-    [HttpPost]
+    [HttpPost("search")]
     [SwaggerOperation(
         Summary = "Gets a list of administrators",
         Description = "Retrieves a paginated and filtered list of administrators based on search parameters.",

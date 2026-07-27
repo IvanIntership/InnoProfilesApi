@@ -15,4 +15,5 @@ public class Office : BaseEntity
         Address = address;
         PhoneNumber = phoneNumber;
     }
+    protected Office() { }
 }

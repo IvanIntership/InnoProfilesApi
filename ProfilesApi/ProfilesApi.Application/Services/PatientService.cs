@@ -38,7 +38,10 @@ public class PatientService : IPatientService
         var patient = _mapper.Map<Patient>(registerPatientDto);
         var account = _mapper.Map<Account>(registerPatientDto);
         
-        createdById ??= account.Id;
+        if (!createdById.HasValue || createdById == Guid.Empty)
+        {
+            createdById = account.Id;
+        }
         
         account.CreatedBy = createdById.Value;
         account.UpdatedBy = createdById.Value;

@@ -48,8 +48,12 @@ public class DoctorService : IDoctorService
         }
         
         var account = _mapper.Map<Account>(createDoctorDto);
+
+        if (!createdById.HasValue || createdById == Guid.Empty)
+        {
+            createdById = account.Id;
+        } 
         
-        createdById ??= account.Id;
         account.CreatedBy = createdById.Value;
         account.UpdatedBy = createdById.Value;
         account.PasswordHash = _passwordHasher.HashPassword(createDoctorDto.Password);
