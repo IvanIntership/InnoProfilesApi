@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProfilesApi.Application.Dto.Doctors;
-using ProfilesApi.Application.Dto.Doctors;
 using ProfilesApi.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
