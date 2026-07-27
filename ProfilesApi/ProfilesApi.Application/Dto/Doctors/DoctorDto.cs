@@ -10,7 +10,6 @@ public record DoctorDto
     public DateTime Birthday { get; init; }
     public string PhoneNumber { get; init; }
     public string Email { get; init; }
-    public string Password { get; init; }
     public string Degree { get; init; }
     public Roles Role { get; init; }
     public Guid OfficeId { get; init; }
