@@ -44,6 +44,10 @@ public class AdministratorService : IAdministratorService
         }
         
         var account = _mapper.Map<Account>(createAdministratorDto);
+        if (createdById == Guid.Empty)
+        {
+            createdById = account.Id;
+        }
         account.CreatedBy = createdById;
         account.UpdatedBy = createdById;
         account.PasswordHash = _passwordHasher.HashPassword(createAdministratorDto.Password);

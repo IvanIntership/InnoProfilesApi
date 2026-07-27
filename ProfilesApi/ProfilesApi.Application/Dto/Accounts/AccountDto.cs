@@ -2,13 +2,15 @@
 
 namespace ProfilesApi.Application.Dto.Accounts;
 
-public record AccountDto(
-    Guid Id,
-    string Firstname,
-    string Lastname,
-    DateTime Birthday,
-    string PhoneNumber,
-    string Email,
-    Roles Role,
-    string? PhotoUrl,
-    Guid? PhotoId);
+public record AccountDto
+{
+    public Guid Id { get; init; }
+    public string Firstname { get; init; }
+    public string Lastname { get; init; }
+    public DateTime Birthday { get; init; }
+    public string PhoneNumber { get; init; }
+    public string Email { get; init; }
+    public Roles Role { get; init; }
+    public string? PhotoUrl { get; init; }
+    public Guid? PhotoId { get; init; }
+}

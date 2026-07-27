@@ -1,5 +1,7 @@
 ﻿namespace ProfilesApi.Application.Dto.Specializations;
 
-public record SpecializationDto(
-    Guid Id,
-    string Name);
+public record SpecializationDto
+{
+    public Guid Id { get; init; }
+    public string Name { get; init; }
+}

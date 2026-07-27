@@ -27,7 +27,7 @@ public class Doctor : SoftDeletableEntity
             return result;
         }
     }
-
+    protected Doctor() { }
     public Doctor(Guid accountId, Guid specializationId, Guid officeId, DateTime careerStartDate, int gapInMonths, string degree)
     {
         AccountId = accountId;

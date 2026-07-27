@@ -89,7 +89,7 @@ public class PatientsController : ControllerBase
         return Ok(patient);
     }
 
-    [HttpPost]
+    [HttpPost("search")]
     [SwaggerOperation(
         Summary = "Gets a list of patients",
         Description = "Retrieves a paginated and filtered list of patients based on search parameters.",

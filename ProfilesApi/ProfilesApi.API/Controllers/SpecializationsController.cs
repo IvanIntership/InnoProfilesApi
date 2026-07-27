@@ -74,7 +74,7 @@ public class SpecializationsController : ControllerBase
         return Ok(specialization);
     }
 
-    [HttpPost]
+    [HttpPost("search")]
     [SwaggerOperation(
         Summary = "Gets a list of specializations",
         Description = "Retrieves a paginated and filtered list of specializations based on search parameters.",

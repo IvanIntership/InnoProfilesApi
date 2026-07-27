@@ -1,8 +1,10 @@
 ﻿namespace ProfilesApi.Application.Dto.Offices;
 
-public record OfficeDto(
-    Guid Id,
-    string Address,
-    string PhoneNumber,
-    Guid? PhotoId,
-    string? PhotoUrl);
+public record OfficeDto
+{
+    public Guid Id { get; init; }
+    public string Address { get; init; }
+    public string PhoneNumber { get; init; }
+    public Guid? PhotoId { get; init; }
+    public string? PhotoUrl { get; init; }
+}

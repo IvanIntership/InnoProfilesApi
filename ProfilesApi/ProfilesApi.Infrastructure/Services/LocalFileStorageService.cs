@@ -12,8 +12,9 @@ public class LocalFileStorageService : IFileStorageService
 
     public LocalFileStorageService(IConfiguration configuration)
     {
-        _currentDirectory = configuration["FileStorageSettings:StoragePath"] ?? "wwwroot/photos";
+        var rawPath = configuration["FileStorageSettings:StoragePath"] ?? "wwwroot/photos";
 
+        _currentDirectory = Path.GetFullPath(rawPath);
         if (!Directory.Exists(_currentDirectory))
         {
             Directory.CreateDirectory(_currentDirectory);
