@@ -12,15 +12,8 @@ public class AccountMappingProfile : Profile
 {
     public AccountMappingProfile()
     {
-        CreateMap<Account, AccountDto>()
-            .ForMember(
-                dest => dest.PhotoUrl,
-                opt => opt.MapFrom(src => src.Photo!= null ? src.Photo.Url : null));
-        
-        CreateMap<Account, AdministratorDto>()
-            .ForMember(
-                dest => dest.PhotoUrl,
-                opt => opt.MapFrom(src => src.Photo!= null ? src.Photo.Url : null));
+        CreateMap<Account, AccountDto>();
+        CreateMap<Account, AdministratorDto>();
 
         CreateMap<CreateAdministratorDto, Account>()
             .ForMember(
@@ -34,10 +27,7 @@ public class AccountMappingProfile : Profile
                 opt => opt.MapFrom(src => Roles.Administrator)
             );
         
-        CreateMap<Account, DoctorDto>()
-            .ForMember(
-                dest => dest.PhotoUrl,
-                opt => opt.MapFrom(src => src.Photo!= null ? src.Photo.Url : null));
+        CreateMap<Account, DoctorDto>();
         
         CreateMap<CreateDoctorDto, Account>()
             .ForMember(
@@ -51,11 +41,7 @@ public class AccountMappingProfile : Profile
                 opt => opt.MapFrom(src => Roles.Doctor)
             );
         
-        CreateMap<Account, PatientDto>()
-            .ForMember(
-                dest => dest.PhotoUrl,
-                opt => opt.MapFrom(src => src.Photo!= null ? src.Photo.Url : null));
-
+        CreateMap<Account, PatientDto>();
         CreateMap<EditPatientProfileDto, Account>();
         CreateMap<RegisterPatientDto, Account>();
     }
