@@ -5,6 +5,7 @@ namespace ProfilesApi.Application.Dto.Administrators;
 public record AdministratorDto
 {
     public Guid Id { get; init; }
+    public Guid AccountId { get; init; }
     public string Firstname { get; init; }
     public string Lastname { get; init; }
     public DateTime Birthday { get; init; }
