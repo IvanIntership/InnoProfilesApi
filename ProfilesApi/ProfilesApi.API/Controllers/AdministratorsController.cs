@@ -24,6 +24,9 @@ public class AdministratorsController : ControllerBase
         OperationId = "AddAdministrator"
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Administrator was created successfully", typeof(AdministratorDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Office with specified ID was not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> CreateAdministrator([FromBody] CreateAdministratorDto createAdministratorDto,
         [FromHeader(Name = "X-User-Id")] Guid createdById, CancellationToken ct = default)
@@ -39,6 +42,8 @@ public class AdministratorsController : ControllerBase
         OperationId = "DeleteAdministrator"
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Administrator was successfully deleted")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Administrator with specified ID was not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Cannot delete the last administrator in the system")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> DeleteAdministrator([FromRoute] Guid id, CancellationToken ct = default)
     {
@@ -52,7 +57,10 @@ public class AdministratorsController : ControllerBase
         Description = "Edits system administrators specified details. Requires the acting user's ID in the request header",
         OperationId = "EditAdministrator"
     )]
-    [SwaggerResponse(StatusCodes.Status200OK, "Administrator was successfully edited", typeof(AdministratorDto))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Administrator profile was successfully edited", typeof(AdministratorDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Administrator or office with specified ID was not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> EditAdministratorProfile([FromBody] EditAdministratorProfileDto editAdministratorProfileDto,
         [FromHeader(Name = "X-User-Id")] Guid editedById, CancellationToken ct = default)
@@ -68,6 +76,7 @@ public class AdministratorsController : ControllerBase
         OperationId = "GetAdministratorById"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Administrator retrieved successfully", typeof(AdministratorDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Administrator with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetAdministrator([FromRoute] Guid administratorId, CancellationToken ct = default)
     {
@@ -82,6 +91,7 @@ public class AdministratorsController : ControllerBase
         OperationId = "GetAdministratorByAccountId"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Administrator retrieved successfully", typeof(AdministratorDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Administrator with specified account ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetByAccountId([FromRoute] Guid accountId, CancellationToken ct = default)
     {
@@ -96,6 +106,7 @@ public class AdministratorsController : ControllerBase
         OperationId = "GetAdministrators"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "List of administrators retrieved successfully", typeof(IEnumerable<AdministratorDto>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid search or filter parameters")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetAdministrators(
         [FromBody] SearchFilteredAdministratorListDto filteredAdministratorListDto, CancellationToken ct = default)

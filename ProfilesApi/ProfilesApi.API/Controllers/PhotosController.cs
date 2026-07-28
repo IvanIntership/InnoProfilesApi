@@ -24,6 +24,7 @@ public class PhotosController : ControllerBase
         OperationId = "DeletePhoto"
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Photo was successfully deleted")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Photo with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> DeletePhoto([FromRoute] Guid photoId, CancellationToken ct = default)
     {
@@ -38,7 +39,8 @@ public class PhotosController : ControllerBase
         Description = "Retrieves detailed information for a specific photo using its unique identifier.",
         OperationId = "GetPhotoById"
     )]
-    [SwaggerResponse(StatusCodes.Status200OK, "Photo retrieved successfully", typeof(PhotoDto))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Photo stream retrieved successfully", typeof(FileStreamResult))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Photo record or physical file was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetPhoto([FromRoute] Guid photoId, CancellationToken ct = default)
     {
@@ -54,6 +56,7 @@ public class PhotosController : ControllerBase
         OperationId = "UploadPhoto"
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Photo was uploaded successfully", typeof(PhotoDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid file format or missing photo file")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> UploadPhoto(IFormFile file, CancellationToken ct)
     { 

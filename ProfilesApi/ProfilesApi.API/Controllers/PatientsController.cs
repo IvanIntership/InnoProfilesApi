@@ -24,6 +24,8 @@ public class PatientsController : ControllerBase
         OperationId = "CreatePatient"
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Patient was created successfully", typeof(PatientDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> CreatePatient([FromBody] RegisterPatientDto registerPatientDto,
         [FromHeader(Name = "X-User-Id")] Guid createdById, CancellationToken ct = default)
@@ -39,6 +41,7 @@ public class PatientsController : ControllerBase
         OperationId = "DeletePatient"
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Patient was successfully deleted")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Patient with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> DeletePatient([FromRoute] Guid id, CancellationToken ct = default)
     {
@@ -52,7 +55,10 @@ public class PatientsController : ControllerBase
         Description = "Edits patient specified details. Requires the acting user's ID in the request header",
         OperationId = "EditPatient"
     )]
-    [SwaggerResponse(StatusCodes.Status200OK, "Patient was successfully edited", typeof(PatientDto))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Patient profile was successfully edited", typeof(PatientDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Patient with specified ID was not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> EditPatientProfile([FromBody] EditPatientProfileDto editPatientProfileDto,
         [FromHeader(Name = "X-User-Id")] Guid editedById, CancellationToken ct = default)
@@ -68,6 +74,7 @@ public class PatientsController : ControllerBase
         OperationId = "GetPatientById"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Patient retrieved successfully", typeof(PatientDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Patient with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetPatient([FromRoute] Guid patientId, CancellationToken ct = default)
     {
@@ -82,6 +89,7 @@ public class PatientsController : ControllerBase
         OperationId = "GetPatientByAccountId"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Patient retrieved successfully", typeof(PatientDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Patient with specified account ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetByAccountId([FromRoute] Guid accountId, CancellationToken ct = default)
     {
@@ -96,6 +104,7 @@ public class PatientsController : ControllerBase
         OperationId = "GetPatients"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "List of patients retrieved successfully", typeof(IEnumerable<PatientDto>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid search or filter parameters")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetPatients(
         [FromBody] SearchFilteredPatientListDto filteredPatientListDto, CancellationToken ct = default)

@@ -2,6 +2,7 @@
 using ProfilesApi.Application.Dto.Patients;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
+using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
@@ -27,12 +28,12 @@ public class PatientService : IPatientService
 
         if (emailExists)
         {
-            throw new InvalidOperationException("Email is already in use by another account.");
+            throw new ConflictException("Email is already in use by another account.");
         }
 
         if (numberExists)
         {
-            throw new InvalidOperationException("Phone number is already in use by another account.");
+            throw new ConflictException("Phone number is already in use by another account.");
         }
 
         var patient = _mapper.Map<Patient>(registerPatientDto);
@@ -63,7 +64,7 @@ public class PatientService : IPatientService
         
         if (patient == null)
         {
-            throw new KeyNotFoundException($"Patient with ID '{id}' was not found.");
+            throw new NotFoundException($"Patient with ID '{id}' was not found.");
         }
         
         return _mapper.Map<PatientDto>(patient);
@@ -102,21 +103,21 @@ public class PatientService : IPatientService
 
         if (patient == null)
         {
-            throw new KeyNotFoundException($"Patient with ID '{editPatientProfileDto.Id}' was not found.");
+            throw new NotFoundException($"Patient with ID '{editPatientProfileDto.Id}' was not found.");
         }
         
         var phoneExists = await _unitOfWork.Accounts.ExistsAsync(
             a => a.Id != patient.AccountId && a.PhoneNumber == editPatientProfileDto.PhoneNumber, ct);
         if (phoneExists)
         {
-            throw new InvalidOperationException("Phone number is already in use by another account.");
+            throw new ConflictException("Phone number is already in use by another account.");
         }
         
         var emailExists = await _unitOfWork.Accounts.ExistsAsync(
             a => a.Id != patient.AccountId && a.Email == editPatientProfileDto.Email, ct);
         if (emailExists)
         {
-            throw new InvalidOperationException("Email is already in use by another account.");
+            throw new ConflictException("Email is already in use by another account.");
         }
         
         _mapper.Map(editPatientProfileDto, patient);
@@ -133,7 +134,7 @@ public class PatientService : IPatientService
 
         if (patient == null)
         {
-            throw new KeyNotFoundException($"Patient with ID '{id}' was not found.");
+            throw new NotFoundException($"Patient with ID '{id}' was not found.");
         }
         
         _unitOfWork.Patients.Delete(patient);
@@ -148,7 +149,7 @@ public class PatientService : IPatientService
         
         if (patient == null)
         {
-            throw new KeyNotFoundException($"Patient with account ID '{accountId}' was not found.");
+            throw new NotFoundException($"Patient with account ID '{accountId}' was not found.");
         }
         
         return _mapper.Map<PatientDto>(patient);

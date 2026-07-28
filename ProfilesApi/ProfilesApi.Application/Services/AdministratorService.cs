@@ -2,6 +2,7 @@
 using ProfilesApi.Application.Dto.Administrators;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
+using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
@@ -29,18 +30,18 @@ public class AdministratorService : IAdministratorService
 
         if (emailExists)
         {
-            throw new InvalidOperationException("Email is already in use by another account.");
+            throw new ConflictException("Email is already in use by another account.");
         }
 
         if (numberExists)
         {
-            throw new InvalidOperationException("Phone number is already in use by another account.");
+            throw new ConflictException("Phone number is already in use by another account.");
         }
         
         var officeExists = await _unitOfWork.Offices.ExistsAsync(o => o.Id == createAdministratorDto.OfficeId, ct);
         if (!officeExists)
         {
-            throw new KeyNotFoundException($"Office with ID '{createAdministratorDto.OfficeId}' was not found.");
+            throw new NotFoundException($"Office with ID '{createAdministratorDto.OfficeId}' was not found.");
         }
         
         var account = _mapper.Map<Account>(createAdministratorDto);
@@ -71,13 +72,13 @@ public class AdministratorService : IAdministratorService
 
         if (administrator == null)
         {
-            throw new KeyNotFoundException($"Administrator with ID '{id}' was not found.");
+            throw new NotFoundException($"Administrator with ID '{id}' was not found.");
         }
         
         var totalAdminsCount = await _unitOfWork.Administrators.ExistsAsync(a => a.Id != id, ct);
         if (!totalAdminsCount)
         {
-            throw new InvalidOperationException("Cannot delete the last administrator in the system.");
+            throw new ConflictException("Cannot delete the last administrator in the system.");
         }
         
         _unitOfWork.Administrators.Delete(administrator);
@@ -93,27 +94,27 @@ public class AdministratorService : IAdministratorService
 
         if (administrator == null)
         {
-            throw new KeyNotFoundException($"Administrator with ID '{editAdministratorProfileDto.Id}' was not found.");
+            throw new NotFoundException($"Administrator with ID '{editAdministratorProfileDto.Id}' was not found.");
         }
         
         var officeExists = await _unitOfWork.Offices.ExistsAsync(o => o.Id == editAdministratorProfileDto.OfficeId, ct);
         if (!officeExists)
         {
-            throw new KeyNotFoundException($"Office with ID '{editAdministratorProfileDto.OfficeId}' was not found.");
+            throw new NotFoundException($"Office with ID '{editAdministratorProfileDto.OfficeId}' was not found.");
         }
         
         var phoneExists = await _unitOfWork.Accounts.ExistsAsync(
             a => a.Id != administrator.AccountId && a.PhoneNumber == editAdministratorProfileDto.PhoneNumber, ct);
         if (phoneExists)
         {
-            throw new InvalidOperationException("Phone number is already in use by another account.");
+            throw new ConflictException("Phone number is already in use by another account.");
         }
         
         var emailExists = await _unitOfWork.Accounts.ExistsAsync(
             a => a.Id != administrator.AccountId && a.Email == editAdministratorProfileDto.Email, ct);
         if (emailExists)
         {
-            throw new InvalidOperationException("Email is already in use by another account.");
+            throw new ConflictException("Email is already in use by another account.");
         }
         
         _mapper.Map(editAdministratorProfileDto, administrator);
@@ -130,7 +131,7 @@ public class AdministratorService : IAdministratorService
     
         if (administrator == null)
         {
-            throw new KeyNotFoundException($"Administrator with ID '{id}' was not found.");
+            throw new NotFoundException($"Administrator with ID '{id}' was not found.");
         }
     
         return _mapper.Map<AdministratorDto>(administrator);
@@ -170,7 +171,7 @@ public class AdministratorService : IAdministratorService
     
         if (administrator == null)
         {
-            throw new KeyNotFoundException($"Administrator with account ID '{accountId}' was not found.");
+            throw new NotFoundException($"Administrator with account ID '{accountId}' was not found.");
         }
     
         return _mapper.Map<AdministratorDto>(administrator);

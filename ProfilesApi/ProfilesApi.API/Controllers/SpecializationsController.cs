@@ -25,6 +25,8 @@ public class SpecializationsController : ControllerBase
         OperationId = "CreateSpecialization"
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Specialization was created successfully", typeof(SpecializationDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Specialization with this name already exists")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> CreateSpecialization([FromBody] CreateSpecializationDto createSpecializationDto, CancellationToken ct = default)
     {
@@ -39,6 +41,8 @@ public class SpecializationsController : ControllerBase
         OperationId = "DeleteSpecialization"
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Specialization was successfully deleted")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Specialization with specified ID was not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Cannot delete specialization because it is assigned to one or more doctors")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> DeleteSpecialization([FromRoute] Guid id, CancellationToken ct = default)
     {
@@ -53,6 +57,8 @@ public class SpecializationsController : ControllerBase
         OperationId = "EditSpecialization"
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Specialization was successfully edited")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Specialization with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> EditSpecialization([FromBody] EditSpecializationInformationDto editSpecializationInformationDto, CancellationToken ct = default)
     {
@@ -67,6 +73,7 @@ public class SpecializationsController : ControllerBase
         OperationId = "GetSpecializationById"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Specialization retrieved successfully", typeof(SpecializationDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Specialization with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetSpecialization([FromRoute] Guid specializationId, CancellationToken ct = default)
     {
@@ -81,6 +88,7 @@ public class SpecializationsController : ControllerBase
         OperationId = "GetSpecializations"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "List of specializations retrieved successfully", typeof(IEnumerable<SpecializationDto>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid search or filter parameters")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetSpecializations(
         [FromBody] SearchQueryDto filteredSpecializationListDto, CancellationToken ct = default)

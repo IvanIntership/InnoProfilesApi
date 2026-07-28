@@ -24,6 +24,9 @@ public class DoctorsController : ControllerBase
         OperationId = "AddDoctor"
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Doctor was created successfully", typeof(DoctorDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Office or specialization with specified ID was not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> CreateDoctor([FromBody] CreateDoctorDto createDoctorDto,
         [FromHeader(Name = "X-User-Id")] Guid createdById, CancellationToken ct = default)
@@ -39,6 +42,7 @@ public class DoctorsController : ControllerBase
         OperationId = "DeleteDoctor"
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Doctor was successfully deleted")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Doctor with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> DeleteDoctor([FromRoute] Guid id, CancellationToken ct = default)
     {
@@ -52,7 +56,10 @@ public class DoctorsController : ControllerBase
         Description = "Edits system doctor specified details. Requires the acting user's ID in the request header",
         OperationId = "EditDoctor"
     )]
-    [SwaggerResponse(StatusCodes.Status200OK, "Doctor was successfully edited", typeof(DoctorDto))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Doctor profile was successfully edited", typeof(DoctorDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Doctor, office, or specialization with specified ID was not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> EditDoctorProfile([FromBody] EditDoctorProfileDto editDoctorProfileDto,
         [FromHeader(Name = "X-User-Id")] Guid editedById, CancellationToken ct = default)
@@ -68,6 +75,7 @@ public class DoctorsController : ControllerBase
         OperationId = "GetDoctorById"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Doctor retrieved successfully", typeof(DoctorDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Doctor with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetDoctor([FromRoute] Guid doctorId, CancellationToken ct = default)
     {
@@ -82,6 +90,7 @@ public class DoctorsController : ControllerBase
         OperationId = "GetDoctorByAccountId"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Doctor retrieved successfully", typeof(DoctorDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Doctor with specified account ID was not found")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetByAccountId([FromRoute] Guid accountId, CancellationToken ct = default)
     {
@@ -95,7 +104,8 @@ public class DoctorsController : ControllerBase
         Description = "Retrieves a paginated and filtered list of doctors based on search parameters.",
         OperationId = "GetDoctors"
     )]
-    [SwaggerResponse(StatusCodes.Status200OK, "List of Doctors retrieved successfully", typeof(IEnumerable<DoctorDto>))]
+    [SwaggerResponse(StatusCodes.Status200OK, "List of doctors retrieved successfully", typeof(IEnumerable<DoctorDto>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid search or filter parameters")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetDoctors(
         [FromBody] SearchFilteredDoctorListDto filteredDoctorListDto, CancellationToken ct = default)

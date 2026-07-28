@@ -3,6 +3,7 @@ using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Dto.Specializations;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
+using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
@@ -26,7 +27,7 @@ public class SpecializationService : ISpecializationService
         
         if (alreadyExists)
         {
-            throw new InvalidOperationException("Specialization already exists");
+            throw new ConflictException("Specialization already exists");
         }
         
         _unitOfWork.Specializations.Add(specialization);
@@ -61,7 +62,7 @@ public class SpecializationService : ISpecializationService
         
         if (specialization == null)
         {
-            throw new KeyNotFoundException($"Specialization with ID '{id}' was not found.");
+            throw new NotFoundException($"Specialization with ID '{id}' was not found.");
         }
         
         return _mapper.Map<SpecializationDto>(specialization);
@@ -73,14 +74,14 @@ public class SpecializationService : ISpecializationService
 
         if (specialization == null)
         {
-            throw new KeyNotFoundException($"Specialization with ID '{id}' was not found.");
+            throw new NotFoundException($"Specialization with ID '{id}' was not found.");
         }
 
         var hasAssociatedDoctors = await _unitOfWork.Doctors.ExistsAsync(d => d.SpecializationId == id, ct);
 
         if (hasAssociatedDoctors)
         {
-            throw new InvalidOperationException("Cannot delete specialization because it is assigned to one or more doctors.");
+            throw new ConflictException("Cannot delete specialization because it is assigned to one or more doctors.");
         }
         
         _unitOfWork.Specializations.Delete(specialization);
@@ -94,7 +95,7 @@ public class SpecializationService : ISpecializationService
         
         if (existingSpecialization == null)
         {
-            throw new KeyNotFoundException("Specialization was not found.");
+            throw new NotFoundException("Specialization was not found.");
         }
         
         _mapper.Map(editSpecializationInformationDto, existingSpecialization);

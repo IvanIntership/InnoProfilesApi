@@ -2,6 +2,7 @@
 using ProfilesApi.Application.Dto.Photos;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
+using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
@@ -35,7 +36,7 @@ public class PhotoService : IPhotoService
         var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
         if (photo == null)
         {
-            throw new KeyNotFoundException($"Photo with ID '{photoId}' was not found.");
+            throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
         }
 
         if (!string.IsNullOrWhiteSpace(photo.Url))
@@ -52,17 +53,17 @@ public class PhotoService : IPhotoService
         var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
         if (photo == null)
         {
-            throw new KeyNotFoundException($"Photo with ID '{photoId}' was not found.");
+            throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
         }
 
         var fileName = Path.GetFileName(photo.Url);
         
-        if (string.IsNullOrWhiteSpace(fileName)) throw new KeyNotFoundException($"Photo with ID '{photoId}' was not found.");
+        if (string.IsNullOrWhiteSpace(fileName)) throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
 
         var fileResult = await _fileStorageService.GetPhotoAsync(fileName, ct);
         if (fileResult == null)
         {
-            throw new KeyNotFoundException($"Physical file for photo ID '{photoId}' was not found on storage.");
+            throw new NotFoundException($"Physical file for photo ID '{photoId}' was not found on storage.");
         }
 
         return fileResult.Value;
