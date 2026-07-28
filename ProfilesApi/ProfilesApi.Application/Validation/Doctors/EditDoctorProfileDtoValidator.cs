@@ -37,5 +37,20 @@ public class EditDoctorProfileDtoValidator : AbstractValidator<EditDoctorProfile
         RuleFor(x => x.Degree)
             .NotEmpty().WithMessage("Degree is required.")
             .MaximumLength(50).WithMessage("Degree cannot be longer than 50 characters.");
+        
+        RuleFor(x => x.CareerStartDate)
+            .GreaterThan(x => x.Birthday)
+            .WithMessage("Career start date must be after the birthday.");
+        
+        RuleFor(x => x.GapInMonths)
+            .Must((dto, gap) =>
+            {
+                var today = DateTime.UtcNow;
+                var totalMonths = ((today.Year - dto.CareerStartDate.Year) * 12) 
+                    + today.Month - dto.CareerStartDate.Month;
+
+                return gap <= totalMonths;
+            })
+            .WithMessage("Gap in months cannot be greater than total career duration.");
     }
 }

@@ -17,20 +17,12 @@ public class DoctorDtoValidator : AbstractValidator<DoctorDto>
         
         RuleFor(x => x.Id).NotEmpty();
         
-
         RuleFor(x => x.PhotoId)
             .NotEmpty().WithMessage("Invalid photo ID format.")
             .When(x => x.PhotoId.HasValue);
 
         RuleFor(x => x.OfficeId)
             .NotEmpty().WithMessage("Office ID is required.");
-
-        RuleFor(x => x.CareerStartDate)
-            .NotEmpty().WithMessage("Career start date is required.")
-            .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Career start date cannot be in the future.");
-
-        RuleFor(x => x.GapInMonths)
-            .GreaterThanOrEqualTo(0).WithMessage("Gap in months cannot be negative.");
 
         RuleFor(x => x.SpecializationId)
             .NotEmpty().WithMessage("Specialization is required.");
