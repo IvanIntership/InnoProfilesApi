@@ -10,7 +10,9 @@ public class RegisterPatientDtoValidator : AbstractValidator<RegisterPatientDto>
     {
         RuleFor(x => x.Firstname).FirstnameRules();
         RuleFor(x => x.Lastname).LastnameRules();
-        RuleFor(x => x.Birthday).BirthdayRules();
+        RuleFor(x => x.Birthday)
+            .NotEmpty()
+            .LessThan(DateTime.UtcNow).WithMessage("A birthday cannot be in the future.");
         RuleFor(x => x.PhoneNumber).PhoneNumberRules();
         RuleFor(x => x.Email).EmailRules();
         RuleFor(x => x.Password).PasswordRules();
