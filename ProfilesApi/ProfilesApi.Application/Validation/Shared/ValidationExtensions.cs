@@ -46,7 +46,9 @@ public static class ValidationExtensions
     {
         return ruleBuilder
             .NotEmpty()
-            .LessThan(DateTime.UtcNow).WithMessage("A birthday cannot be in the future.");
+            .LessThan(DateTime.UtcNow).WithMessage("A birthday cannot be in the future.")
+            .Must(birthday => birthday <= DateTime.UtcNow.AddYears(-18))
+            .WithMessage("Person must be at least 18 years old.");
     }
 
     public static IRuleBuilderOptions<T, string> PhoneNumberRules<T>(this IRuleBuilder<T, string> ruleBuilder)
