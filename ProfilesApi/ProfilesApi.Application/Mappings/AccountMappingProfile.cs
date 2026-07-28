@@ -20,12 +20,13 @@ public class AccountMappingProfile : Profile
                 dest => dest.Role, 
                 opt => opt.MapFrom(src => Roles.Administrator)
             );
-        
+
         CreateMap<EditAdministratorProfileDto, Account>()
             .ForMember(
-                dest => dest.Role, 
+                dest => dest.Role,
                 opt => opt.MapFrom(src => Roles.Administrator)
-            );
+            )
+            .ForMember(dest => dest.Id, opt => opt.Ignore());
         
         CreateMap<Account, DoctorDto>();
         
@@ -39,10 +40,12 @@ public class AccountMappingProfile : Profile
             .ForMember(
                 dest => dest.Role, 
                 opt => opt.MapFrom(src => Roles.Doctor)
-            );
+            )
+            .ForMember(dest => dest.Id, opt => opt.Ignore());
         
         CreateMap<Account, PatientDto>();
-        CreateMap<EditPatientProfileDto, Account>();
+        CreateMap<EditPatientProfileDto, Account>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore());
         CreateMap<RegisterPatientDto, Account>();
     }
 }

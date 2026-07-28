@@ -16,6 +16,5 @@ public record DoctorDto
     public Guid OfficeId { get; init; }
     public Guid SpecializationId { get; init; }
     public Guid? PhotoId { get; init; }
-    public DateTime CareerStartDate { get; init; }
-    public int GapInMonths { get; init; }
+    public int TotalExperience { get; init; }
 }
