@@ -122,7 +122,7 @@ public class DoctorService : IDoctorService
             throw new InvalidOperationException("Email is already in use by another account.");
         }
         
-        doctor = _mapper.Map(editDoctorProfileDto, doctor);
+        _mapper.Map(editDoctorProfileDto, doctor);
         
         doctor.Account.UpdatedBy = editedById ?? doctor.Account.Id;
         

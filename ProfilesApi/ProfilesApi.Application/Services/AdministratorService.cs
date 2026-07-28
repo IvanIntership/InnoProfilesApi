@@ -116,7 +116,7 @@ public class AdministratorService : IAdministratorService
             throw new InvalidOperationException("Email is already in use by another account.");
         }
         
-        administrator = _mapper.Map(editAdministratorProfileDto, administrator);
+        _mapper.Map(editAdministratorProfileDto, administrator);
         
         administrator.Account.UpdatedBy = editedById;
         
