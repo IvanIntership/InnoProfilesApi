@@ -2,7 +2,7 @@
 
 namespace ProfilesApi.Application.Interfaces;
 
-public interface IUnitOfWork
+public interface IUnitOfWork : IDisposable, IAsyncDisposable
 {
     IAccountRepository Accounts { get; }
     IAdministratorRepository Administrators { get; }
@@ -13,4 +13,7 @@ public interface IUnitOfWork
     ISpecializationRepository Specializations { get; }
     int Complete();
     Task<int> CompleteAsync(CancellationToken ct = default);
+    Task BeginTransactionAsync(CancellationToken ct = default);
+    Task CommitTransactionAsync(CancellationToken ct = default);
+    Task RollbackTransactionAsync(CancellationToken ct = default);
 }

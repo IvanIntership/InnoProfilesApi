@@ -57,13 +57,24 @@ public class AdministratorService : IAdministratorService
 
         administrator.AccountId = account.Id;
         administrator.Account = account;
-        
-        _unitOfWork.Accounts.Add(account);
-        _unitOfWork.Administrators.Add(administrator);
 
-        await _unitOfWork.CompleteAsync(ct);
-        
-        return _mapper.Map<AdministratorDto>(administrator);
+        await _unitOfWork.BeginTransactionAsync(ct);
+        try
+        {
+            _unitOfWork.Accounts.Add(account);
+            _unitOfWork.Administrators.Add(administrator);
+            
+            await _unitOfWork.CompleteAsync(ct);
+
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            return _mapper.Map<AdministratorDto>(administrator);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 
     public async Task DeleteAdministratorAsync(Guid id, CancellationToken ct = default)
@@ -80,11 +91,22 @@ public class AdministratorService : IAdministratorService
         {
             throw new ConflictException("Cannot delete the last administrator in the system.");
         }
-        
-        _unitOfWork.Administrators.Delete(administrator);
-        _unitOfWork.Accounts.Delete(administrator.Account);
 
-        await _unitOfWork.CompleteAsync(ct);
+        await _unitOfWork.BeginTransactionAsync(ct);
+        try
+        {
+            _unitOfWork.Administrators.Delete(administrator);
+            _unitOfWork.Accounts.Delete(administrator.Account);
+
+            await _unitOfWork.CompleteAsync(ct);
+            
+            await _unitOfWork.CommitTransactionAsync(ct);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 
     public async Task<AdministratorDto> EditAdministratorProfileAsync(EditAdministratorProfileDto editAdministratorProfileDto, Guid editedById,
@@ -121,8 +143,20 @@ public class AdministratorService : IAdministratorService
         
         administrator.Account.UpdatedBy = editedById;
         
-        await _unitOfWork.CompleteAsync(ct);
-        return _mapper.Map<AdministratorDto>(administrator);
+        await _unitOfWork.BeginTransactionAsync(ct);
+        try
+        {
+            await _unitOfWork.CompleteAsync(ct);
+            
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            return _mapper.Map<AdministratorDto>(administrator);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 
     public async Task<AdministratorDto> GetAdministratorAsync(Guid id, CancellationToken ct = default)

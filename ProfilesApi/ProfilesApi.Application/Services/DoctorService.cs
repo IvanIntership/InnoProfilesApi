@@ -64,12 +64,23 @@ public class DoctorService : IDoctorService
         doctor.AccountId = account.Id;
         doctor.Account = account;
         
-        _unitOfWork.Accounts.Add(account);
-        _unitOfWork.Doctors.Add(doctor);
+        await _unitOfWork.BeginTransactionAsync(ct);
+        try
+        {
+            _unitOfWork.Accounts.Add(account);
+            _unitOfWork.Doctors.Add(doctor);
 
-        await _unitOfWork.CompleteAsync(ct);
-        
-        return _mapper.Map<DoctorDto>(doctor);
+            await _unitOfWork.CompleteAsync(ct);
+
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            return _mapper.Map<DoctorDto>(doctor);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 
     public async Task DeleteDoctorAsync(Guid id, CancellationToken ct = default)
@@ -81,10 +92,21 @@ public class DoctorService : IDoctorService
             throw new NotFoundException($"Doctor with ID '{id}' was not found.");
         }
         
-        _unitOfWork.Doctors.Delete(doctor);
-        _unitOfWork.Accounts.Delete(doctor.Account);
+        await _unitOfWork.BeginTransactionAsync(ct);
+        try
+        {
+            _unitOfWork.Doctors.Delete(doctor);
+            _unitOfWork.Accounts.Delete(doctor.Account);
 
-        await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CompleteAsync(ct);
+            
+            await _unitOfWork.CommitTransactionAsync(ct);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 
     public async Task<DoctorDto> EditDoctorProfileAsync(EditDoctorProfileDto editDoctorProfileDto, Guid? editedById = null,
@@ -127,8 +149,20 @@ public class DoctorService : IDoctorService
         
         doctor.Account.UpdatedBy = editedById ?? doctor.Account.Id;
         
-        await _unitOfWork.CompleteAsync(ct);
-        return _mapper.Map<DoctorDto>(doctor);
+        await _unitOfWork.BeginTransactionAsync(ct);
+        try
+        {
+            await _unitOfWork.CompleteAsync(ct);
+            
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            return _mapper.Map<DoctorDto>(doctor);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 
     public async Task<DoctorDto> GetDoctorAsync(Guid id, CancellationToken ct = default)
