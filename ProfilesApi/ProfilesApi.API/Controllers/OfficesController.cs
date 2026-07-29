@@ -25,6 +25,8 @@ public class OfficesController : ControllerBase
         OperationId = "CreateOffice"
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Office was created successfully", typeof(OfficeDto))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Office with this address or phone number already exists")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> CreateOffice([FromBody] CreateOfficeDto createOfficeDto, CancellationToken ct = default)
     {
@@ -39,6 +41,8 @@ public class OfficesController : ControllerBase
         OperationId = "DeleteOffice"
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Office was successfully deleted")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Office with specified ID was not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Cannot delete office because staff members are assigned to it")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> DeleteOffice([FromRoute] Guid id, CancellationToken ct = default)
     {
@@ -53,6 +57,9 @@ public class OfficesController : ControllerBase
         OperationId = "EditOffice"
     )]
     [SwaggerResponse(StatusCodes.Status204NoContent, "Office was successfully edited")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Office with specified ID was not found")]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Another office with this address or phone number already exists")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> EditOffice([FromBody] EditOfficeInformationDto editOfficeInformationDto, CancellationToken ct = default)
     {
@@ -67,6 +74,7 @@ public class OfficesController : ControllerBase
         OperationId = "GetOfficeById"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Office retrieved successfully", typeof(OfficeDto))]
+    [SwaggerResponse(StatusCodes.Status409Conflict, "Office with specified ID does not exist")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetOffice([FromRoute] Guid officeId, CancellationToken ct = default)
     {
@@ -81,6 +89,7 @@ public class OfficesController : ControllerBase
         OperationId = "GetOffices"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "List of offices retrieved successfully", typeof(IEnumerable<OfficeDto>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid search or filter parameters")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
     public async Task<IActionResult> GetOffices(
         [FromBody] SearchQueryDto filteredOfficeListDto, CancellationToken ct = default)

@@ -3,6 +3,7 @@ using ProfilesApi.Application.Dto.Offices;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
+using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
@@ -26,7 +27,7 @@ public class OfficeService : IOfficeService
         
         if (alreadyExists)
         {
-            throw new InvalidOperationException("Office with this address or phone number already exists.");
+            throw new ConflictException("Office with this address or phone number already exists.");
         }
         
         _unitOfWork.Offices.Add(office);
@@ -52,7 +53,7 @@ public class OfficeService : IOfficeService
 
         if (office == null)
         {
-            throw new ArgumentException($"Office with id {id} does not exist");
+            throw new ConflictException($"Office with id {id} does not exist");
         }
         
         return _mapper.Map<OfficeDto>(office);
@@ -64,7 +65,7 @@ public class OfficeService : IOfficeService
 
         if (office == null)
         {
-            throw new KeyNotFoundException($"Office with ID '{id}' was not found.");
+            throw new NotFoundException($"Office with ID '{id}' was not found.");
         }
 
         var hasAssociatedDoctors = await _unitOfWork.Doctors.ExistsAsync(d => d.OfficeId == id, ct);
@@ -72,7 +73,7 @@ public class OfficeService : IOfficeService
 
         if (hasAssociatedDoctors || hasAssociatedAdministrators)
         {
-            throw new InvalidOperationException("Cannot delete office because people work here.");
+            throw new ConflictException("Cannot delete office because people work here.");
         }
         
         _unitOfWork.Offices.Delete(office);
@@ -85,7 +86,7 @@ public class OfficeService : IOfficeService
         
         if (existingOffice == null)
         {
-            throw new KeyNotFoundException("Office was not found.");
+            throw new NotFoundException("Office was not found.");
         }
         
         var isDuplicate = await _unitOfWork.Offices.ExistsAsync(
@@ -96,7 +97,7 @@ public class OfficeService : IOfficeService
 
         if (isDuplicate)
         {
-            throw new InvalidOperationException("Another office with this address or phone number already exists.");
+            throw new ConflictException("Another office with this address or phone number already exists.");
         }
         
         _mapper.Map(editOfficeInformationDto, existingOffice);

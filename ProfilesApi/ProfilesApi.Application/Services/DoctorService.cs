@@ -2,6 +2,7 @@
 using ProfilesApi.Application.Dto.Doctors;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
+using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
@@ -27,24 +28,24 @@ public class DoctorService : IDoctorService
 
         if (emailExists)
         {
-            throw new InvalidOperationException("Email is already in use by another account.");
+            throw new ConflictException("Email is already in use by another account.");
         }
 
         if (numberExists)
         {
-            throw new InvalidOperationException("Phone number is already in use by another account.");
+            throw new ConflictException("Phone number is already in use by another account.");
         }
         
         var officeExists = await _unitOfWork.Offices.ExistsAsync(o => o.Id == createDoctorDto.OfficeId, ct);
         if (!officeExists)
         {
-            throw new KeyNotFoundException($"Office with ID '{createDoctorDto.OfficeId}' was not found.");
+            throw new NotFoundException($"Office with ID '{createDoctorDto.OfficeId}' was not found.");
         }
         
         var specializationExists = await _unitOfWork.Specializations.ExistsAsync(o => o.Id == createDoctorDto.SpecializationId, ct);
         if (!specializationExists)
         {
-            throw new KeyNotFoundException($"Specialization with ID '{createDoctorDto.SpecializationId}' was not found.");
+            throw new NotFoundException($"Specialization with ID '{createDoctorDto.SpecializationId}' was not found.");
         }
         
         var account = _mapper.Map<Account>(createDoctorDto);
@@ -77,7 +78,7 @@ public class DoctorService : IDoctorService
 
         if (doctor == null)
         {
-            throw new KeyNotFoundException($"Doctor with ID '{id}' was not found.");
+            throw new NotFoundException($"Doctor with ID '{id}' was not found.");
         }
         
         _unitOfWork.Doctors.Delete(doctor);
@@ -93,33 +94,33 @@ public class DoctorService : IDoctorService
 
         if (doctor == null)
         {
-            throw new KeyNotFoundException($"Doctor with ID '{editDoctorProfileDto.Id}' was not found.");
+            throw new NotFoundException($"Doctor with ID '{editDoctorProfileDto.Id}' was not found.");
         }
         
         var officeExists = await _unitOfWork.Offices.ExistsAsync(o => o.Id == editDoctorProfileDto.OfficeId, ct);
         if (!officeExists)
         {
-            throw new KeyNotFoundException($"Office with ID '{editDoctorProfileDto.OfficeId}' was not found.");
+            throw new NotFoundException($"Office with ID '{editDoctorProfileDto.OfficeId}' was not found.");
         }
         
         var specializationExists = await _unitOfWork.Specializations.ExistsAsync(o => o.Id == editDoctorProfileDto.SpecializationId, ct);
         if (!specializationExists)
         {
-            throw new KeyNotFoundException($"Specialization with ID '{editDoctorProfileDto.SpecializationId}' was not found.");
+            throw new NotFoundException($"Specialization with ID '{editDoctorProfileDto.SpecializationId}' was not found.");
         }
         
         var phoneExists = await _unitOfWork.Accounts.ExistsAsync(
             a => a.Id != doctor.AccountId && a.PhoneNumber == editDoctorProfileDto.PhoneNumber, ct);
         if (phoneExists)
         {
-            throw new InvalidOperationException("Phone number is already in use by another account.");
+            throw new ConflictException("Phone number is already in use by another account.");
         }
         
         var emailExists = await _unitOfWork.Accounts.ExistsAsync(
             a => a.Id != doctor.AccountId && a.Email == editDoctorProfileDto.Email, ct);
         if (emailExists)
         {
-            throw new InvalidOperationException("Email is already in use by another account.");
+            throw new ConflictException("Email is already in use by another account.");
         }
         
         _mapper.Map(editDoctorProfileDto, doctor);
@@ -136,7 +137,7 @@ public class DoctorService : IDoctorService
     
         if (doctor == null)
         {
-            throw new KeyNotFoundException($"Doctor with ID '{id}' was not found.");
+            throw new NotFoundException($"Doctor with ID '{id}' was not found.");
         }
     
         return _mapper.Map<DoctorDto>(doctor);
@@ -183,7 +184,7 @@ public class DoctorService : IDoctorService
     
         if (doctor == null)
         {
-            throw new KeyNotFoundException($"Doctor with account ID '{accountId}' was not found.");
+            throw new NotFoundException($"Doctor with account ID '{accountId}' was not found.");
         }
     
         return _mapper.Map<DoctorDto>(doctor);
