@@ -2,7 +2,7 @@
 
 namespace ProfilesApi.Domain.Exceptions;
 
-public class NotFoundException : BaseApplicationException
+public class NotFoundException : Exception
 {
     public NotFoundException(string message) : base(message) { }
 }
