@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Data;
+using AutoMapper;
 using ProfilesApi.Application.Dto.Offices;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
@@ -21,19 +22,28 @@ public class OfficeService : IOfficeService
 
     public async Task<OfficeDto> CreateOfficeAsync(CreateOfficeDto createOfficeDto, CancellationToken ct = default)
     {
-        var office = _mapper.Map<Office>(createOfficeDto);
-        
-        var alreadyExists = await _unitOfWork.Offices.ExistsAsync(o => o.Address.ToLower() == createOfficeDto.Address.ToLower() || o.PhoneNumber == createOfficeDto.PhoneNumber, ct);
-        
-        if (alreadyExists)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            throw new ConflictException("Office with this address or phone number already exists.");
+            var office = _mapper.Map<Office>(createOfficeDto);
+        
+            var alreadyExists = await _unitOfWork.Offices.ExistsAsync(o => o.Address.ToLower() == createOfficeDto.Address.ToLower() || o.PhoneNumber == createOfficeDto.PhoneNumber, ct);
+        
+            if (alreadyExists)
+            {
+                throw new ConflictException("Office with this address or phone number already exists.");
+            }
+        
+            _unitOfWork.Offices.Add(office);
+            await _unitOfWork.CompleteAsync(ct);
+        
+            return _mapper.Map<OfficeDto>(office);
         }
-        
-        _unitOfWork.Offices.Add(office);
-        await _unitOfWork.CompleteAsync(ct);
-        
-        return _mapper.Map<OfficeDto>(office);
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 
     public async Task<IEnumerable<OfficeDto>> GetOfficeListAsync(SearchQueryDto? searchQueryDto, CancellationToken ct = default)
@@ -61,46 +71,65 @@ public class OfficeService : IOfficeService
 
     public async Task DeleteOfficeAsync(Guid id, CancellationToken ct = default)
     {
-        var office = await _unitOfWork.Offices.GetByIdAsync(id, ct);
-
-        if (office == null)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            throw new NotFoundException($"Office with ID '{id}' was not found.");
+            var office = await _unitOfWork.Offices.GetByIdAsync(id, ct);
+
+            if (office == null)
+            {
+                throw new NotFoundException($"Office with ID '{id}' was not found.");
+            }
+
+            var hasAssociatedDoctors = await _unitOfWork.Doctors.ExistsAsync(d => d.OfficeId == id, ct);
+            var hasAssociatedAdministrators = await _unitOfWork.Administrators.ExistsAsync(a => a.OfficeId == id, ct);
+
+            if (hasAssociatedDoctors || hasAssociatedAdministrators)
+            {
+                throw new ConflictException("Cannot delete office because people work here.");
+            }
+
+            _unitOfWork.Offices.Delete(office);
+            await _unitOfWork.CompleteAsync(ct);
         }
-
-        var hasAssociatedDoctors = await _unitOfWork.Doctors.ExistsAsync(d => d.OfficeId == id, ct);
-        var hasAssociatedAdministrators = await _unitOfWork.Administrators.ExistsAsync(a => a.OfficeId == id, ct);
-
-        if (hasAssociatedDoctors || hasAssociatedAdministrators)
+        catch
         {
-            throw new ConflictException("Cannot delete office because people work here.");
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
         }
-        
-        _unitOfWork.Offices.Delete(office);
-        await _unitOfWork.CompleteAsync(ct);
     }
 
     public async Task EditOfficeAsync(EditOfficeInformationDto editOfficeInformationDto, CancellationToken ct = default)
     {
-        var existingOffice = await _unitOfWork.Offices.GetByIdAsync(editOfficeInformationDto.Id, ct);
-        
-        if (existingOffice == null)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            throw new NotFoundException("Office was not found.");
-        }
-        
-        var isDuplicate = await _unitOfWork.Offices.ExistsAsync(
-            o => o.Id != editOfficeInformationDto.Id && 
-                 (o.Address.ToLower() == editOfficeInformationDto.Address.ToLower() || o.PhoneNumber == editOfficeInformationDto.PhoneNumber), 
-            ct
-        );
+            var existingOffice = await _unitOfWork.Offices.GetByIdAsync(editOfficeInformationDto.Id, ct);
 
-        if (isDuplicate)
-        {
-            throw new ConflictException("Another office with this address or phone number already exists.");
+            if (existingOffice == null)
+            {
+                throw new NotFoundException("Office was not found.");
+            }
+
+            var isDuplicate = await _unitOfWork.Offices.ExistsAsync(
+                o => o.Id != editOfficeInformationDto.Id &&
+                     (o.Address.ToLower() == editOfficeInformationDto.Address.ToLower() ||
+                      o.PhoneNumber == editOfficeInformationDto.PhoneNumber),
+                ct
+            );
+
+            if (isDuplicate)
+            {
+                throw new ConflictException("Another office with this address or phone number already exists.");
+            }
+
+            _mapper.Map(editOfficeInformationDto, existingOffice);
+            await _unitOfWork.CompleteAsync(ct);
         }
-        
-        _mapper.Map(editOfficeInformationDto, existingOffice);
-        await _unitOfWork.CompleteAsync(ct);
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 }

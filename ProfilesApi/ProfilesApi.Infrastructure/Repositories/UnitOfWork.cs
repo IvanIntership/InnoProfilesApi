@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+﻿using System.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Interfaces;
 using ProfilesApi.Infrastructure.Data;
@@ -44,10 +46,10 @@ public class UnitOfWork : IUnitOfWork
         return await _context.SaveChangesAsync(ct);
     }
 
-    public async Task BeginTransactionAsync(CancellationToken ct = default)
+    public async Task BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken ct = default)
     {
         if (_currentTransaction != null) return;
-        _currentTransaction = await _context.Database.BeginTransactionAsync(ct);
+        _currentTransaction = await _context.Database.BeginTransactionAsync(isolationLevel, ct);
     }
 
     public async Task CommitTransactionAsync(CancellationToken ct = default)

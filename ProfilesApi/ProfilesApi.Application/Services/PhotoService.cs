@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Data;
+using AutoMapper;
 using ProfilesApi.Application.Dto.Photos;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
@@ -33,39 +34,58 @@ public class PhotoService : IPhotoService
 
     public async Task DeletePhotoAsync(Guid photoId, CancellationToken ct = default)
     {
-        var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
-        if (photo == null)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
-        }
+            var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
+            if (photo == null)
+            {
+                throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
+            }
 
-        if (!string.IsNullOrWhiteSpace(photo.Url))
+            if (!string.IsNullOrWhiteSpace(photo.Url))
+            {
+                _fileStorageService.DeletePhoto(photo.Url, ct);
+            }
+
+            _unitOfWork.Photos.Delete(photo);
+            await _unitOfWork.CompleteAsync(ct);
+        }
+        catch
         {
-            _fileStorageService.DeletePhoto(photo.Url, ct);
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
         }
-
-        _unitOfWork.Photos.Delete(photo);
-        await _unitOfWork.CompleteAsync(ct);
     }
     
     public async Task<(Stream Stream, string ContentType)> GetPhotoAsync(Guid photoId, CancellationToken ct = default)
     {
-        var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
-        if (photo == null)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
+            var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
+            if (photo == null)
+            {
+                throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
+            }
+
+            var fileName = Path.GetFileName(photo.Url);
+
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
+
+            var fileResult = await _fileStorageService.GetPhotoAsync(fileName, ct);
+            if (fileResult == null)
+            {
+                throw new NotFoundException($"Physical file for photo ID '{photoId}' was not found on storage.");
+            }
+
+            return fileResult.Value;
         }
-
-        var fileName = Path.GetFileName(photo.Url);
-        
-        if (string.IsNullOrWhiteSpace(fileName)) throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
-
-        var fileResult = await _fileStorageService.GetPhotoAsync(fileName, ct);
-        if (fileResult == null)
+        catch
         {
-            throw new NotFoundException($"Physical file for photo ID '{photoId}' was not found on storage.");
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
         }
-
-        return fileResult.Value;
     }
 }

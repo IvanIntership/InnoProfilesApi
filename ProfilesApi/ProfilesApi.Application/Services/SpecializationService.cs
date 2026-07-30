@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Data;
+using AutoMapper;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Dto.Specializations;
 using ProfilesApi.Application.Interfaces;
@@ -21,19 +22,30 @@ public class SpecializationService : ISpecializationService
 
     public async Task<SpecializationDto> CreateSpecializationAsync(CreateSpecializationDto createSpecializationDto, CancellationToken ct = default)
     {
-        var specialization = _mapper.Map<Specialization>(createSpecializationDto);
-
-        bool alreadyExists = await _unitOfWork.Specializations.ExistsAsync(s => s.Name.ToLower() == createSpecializationDto.Name.ToLower(), ct);
-        
-        if (alreadyExists)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            throw new ConflictException("Specialization already exists");
+            var specialization = _mapper.Map<Specialization>(createSpecializationDto);
+
+            bool alreadyExists =
+                await _unitOfWork.Specializations.ExistsAsync(
+                    s => s.Name.ToLower() == createSpecializationDto.Name.ToLower(), ct);
+
+            if (alreadyExists)
+            {
+                throw new ConflictException("Specialization already exists");
+            }
+
+            _unitOfWork.Specializations.Add(specialization);
+            await _unitOfWork.CompleteAsync(ct);
+
+            return _mapper.Map<SpecializationDto>(specialization);
         }
-        
-        _unitOfWork.Specializations.Add(specialization);
-        await _unitOfWork.CompleteAsync(ct);
-        
-        return _mapper.Map<SpecializationDto>(specialization);
+        catch
+        {
+            await _unitOfWork.CompleteAsync(ct);
+            throw;
+        }
     }
 
     public async Task<IEnumerable<SpecializationDto>> GetSpecializationsAsync(
@@ -70,35 +82,55 @@ public class SpecializationService : ISpecializationService
 
     public async Task DeleteSpecializationAsync(Guid id, CancellationToken ct = default)
     {
-        var specialization = await _unitOfWork.Specializations.GetByIdAsync(id, ct);
-
-        if (specialization == null)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            throw new NotFoundException($"Specialization with ID '{id}' was not found.");
+            var specialization = await _unitOfWork.Specializations.GetByIdAsync(id, ct);
+
+            if (specialization == null)
+            {
+                throw new NotFoundException($"Specialization with ID '{id}' was not found.");
+            }
+
+            var hasAssociatedDoctors = await _unitOfWork.Doctors.ExistsAsync(d => d.SpecializationId == id, ct);
+
+            if (hasAssociatedDoctors)
+            {
+                throw new ConflictException(
+                    "Cannot delete specialization because it is assigned to one or more doctors.");
+            }
+
+            _unitOfWork.Specializations.Delete(specialization);
+            await _unitOfWork.CompleteAsync(ct);
         }
-
-        var hasAssociatedDoctors = await _unitOfWork.Doctors.ExistsAsync(d => d.SpecializationId == id, ct);
-
-        if (hasAssociatedDoctors)
+        catch
         {
-            throw new ConflictException("Cannot delete specialization because it is assigned to one or more doctors.");
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
         }
-        
-        _unitOfWork.Specializations.Delete(specialization);
-        await _unitOfWork.CompleteAsync(ct);
     }
 
     public async Task EditSpecializationAsync(EditSpecializationInformationDto editSpecializationInformationDto,
         CancellationToken ct = default)
     {
-        var existingSpecialization = await _unitOfWork.Specializations.GetByIdAsync(editSpecializationInformationDto.Id, ct);
-        
-        if (existingSpecialization == null)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            throw new NotFoundException("Specialization was not found.");
+            var existingSpecialization =
+                await _unitOfWork.Specializations.GetByIdAsync(editSpecializationInformationDto.Id, ct);
+
+            if (existingSpecialization == null)
+            {
+                throw new NotFoundException("Specialization was not found.");
+            }
+
+            _mapper.Map(editSpecializationInformationDto, existingSpecialization);
+            await _unitOfWork.CompleteAsync(ct);
         }
-        
-        _mapper.Map(editSpecializationInformationDto, existingSpecialization);
-        await _unitOfWork.CompleteAsync(ct);
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 }
