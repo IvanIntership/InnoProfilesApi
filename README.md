@@ -16,7 +16,8 @@ To successfully build, run, and contribute to this project locally, you will nee
 * **[Git](https://git-scm.com/)** — For version control and source code management.
 
 ### Database & ORM
-* **Microsoft SQL Server** — The primary relational database used by the application (hosted via Docker).
+* **PostgreSQL** — The primary relational database used by the application (hosted via Docker).
+* **MongoDB** — The database is used by the application for logging.
 * **EF Core CLI Tools** — Required to manage database migrations and updates. You can install it globally via terminal:
   `dotnet tool install --global dotnet-ef`
 
@@ -30,51 +31,43 @@ To successfully build, run, and contribute to this project locally, you will nee
 
 > **Note:** Ensure you have installed all the prerequisites mentioned in the section above before proceeding.
 
-**1. Clone the repository** Open your terminal and clone the project to your local machine, then navigate to the project folder:
+### 1. Clone the repository. 
+Open your terminal and clone the project to your local machine, then navigate to the project folder:
 ```bash
 git clone git@github.com:IvanIntership/InnoProfilesApi.git
-cd InnoProfilesApi
+cd InnoProfilesApi/ProfilesApi
 ```
 
-### 2. Configure the Database Connection
+### 2. Configure Environment Variables.
+The application uses a .env file to securely manage database credentials and secrets.
 
-Open the`appsettings.json` file located in the main API project.
-
-Locate the `ConnectionStrings` section and update it to point to your local Microsoft SQL Server instance.
-
-Example:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=InnoProfilesDb;Trusted_Connection=True;TrustServerCertificate=True;"
-  }
-}
-```
-
-### 3. Apply Database Migrations
-
-From the solution root directory, run the following command to create the database and apply all existing migrations:
+In the ProfilesApi folder (right next to your docker-compose.yml), create a new file named .env and add the following configuration:
 
 ```bash
-dotnet ef database update --project ProfilesApi.Infrastructure --startup-project ProfilesApi.API
+POSTGRES_PASSWORD=YourStrongPostgresPassword123!
+PROFILES_DB_CONN=Host=postgresql;Port=5432;Database=ProfilesApiDb;Username=postgres;Password=YourStrongPostgresPassword123!
+MONGO_LOGGING_CONN=mongodb://mongodb:27017/ProfilesLogs
+PASSWORD_SECRET_KEY=YourSuperSecretPepperKey123!
 ```
 
-### 4. Build and Run the Application
-
-You can start the application from the terminal:
-
+### 3. Build and Run the Application.
+You can start the entire infrastructure (API, PostgreSQL, and MongoDB) with a single command. From the terminal, run:
 ```bash
-cd ProfilesApi
-dotnet run --project ProfilesApi.API
+docker compose up --build
 ```
 
-### 5. Explore the API
+### 4. Explore the API.
 
 Once the application is running, open your browser and navigate to the Swagger UI:
 
 ```text
-https://localhost:<port>/swagger
+https://localhost:5242/swagger
 ```
 
-Replace `<port>` with the port number displayed in the application output.
+### 5. Stopping the Application.
+
+To safely stop the application while preserving all your database data, press Ctrl + C in the terminal where Docker is running, or open a new terminal in the same folder and run:
+
+```bash
+docker compose down
+```

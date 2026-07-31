@@ -1,6 +1,7 @@
 using ProfilesApi.Application;
 using ProfilesApi.Infrastructure;
 using FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
 using ProfilesApi.API.Middleware;
 using Serilog;
 using Serilog.Events;
@@ -54,6 +55,21 @@ try
     app.UseStaticFiles();
     app.MapControllers();
 
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            var context = services.GetRequiredService<ProfilesApi.Infrastructure.Data.AppDbContext>();
+            context.Database.Migrate(); 
+            Log.Information("Database migrated successfully.");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "An error occurred while migrating the database.");
+        }
+    }
+    
     app.Run();
 }
 catch(Exception ex)
