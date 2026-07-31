@@ -91,7 +91,11 @@ public class UnitOfWork : IUnitOfWork
     {
         if (!_disposed)
         {
-            _currentTransaction?.Dispose();
+            if (_currentTransaction != null)
+            {
+                _currentTransaction.Dispose();
+                _currentTransaction = null;
+            }
             _context.Dispose();
             _disposed = true;
         }
