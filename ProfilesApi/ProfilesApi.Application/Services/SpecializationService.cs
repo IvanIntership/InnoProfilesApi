@@ -38,7 +38,7 @@ public class SpecializationService : ISpecializationService
 
             _unitOfWork.Specializations.Add(specialization);
             await _unitOfWork.CompleteAsync(ct);
-
+            await _unitOfWork.CommitTransactionAsync(ct);
             return _mapper.Map<SpecializationDto>(specialization);
         }
         catch
@@ -102,6 +102,7 @@ public class SpecializationService : ISpecializationService
 
             _unitOfWork.Specializations.Delete(specialization);
             await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
         }
         catch
         {
@@ -126,6 +127,7 @@ public class SpecializationService : ISpecializationService
 
             _mapper.Map(editSpecializationInformationDto, existingSpecialization);
             await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
         }
         catch
         {

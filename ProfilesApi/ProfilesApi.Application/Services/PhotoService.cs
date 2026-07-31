@@ -50,6 +50,7 @@ public class PhotoService : IPhotoService
 
             _unitOfWork.Photos.Delete(photo);
             await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
         }
         catch
         {
@@ -79,7 +80,7 @@ public class PhotoService : IPhotoService
             {
                 throw new NotFoundException($"Physical file for photo ID '{photoId}' was not found on storage.");
             }
-
+            await _unitOfWork.CommitTransactionAsync(ct);
             return fileResult.Value;
         }
         catch

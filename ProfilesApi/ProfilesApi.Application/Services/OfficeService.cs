@@ -36,6 +36,8 @@ public class OfficeService : IOfficeService
         
             _unitOfWork.Offices.Add(office);
             await _unitOfWork.CompleteAsync(ct);
+            
+            await _unitOfWork.CommitTransactionAsync(ct);
         
             return _mapper.Map<OfficeDto>(office);
         }
@@ -91,6 +93,7 @@ public class OfficeService : IOfficeService
 
             _unitOfWork.Offices.Delete(office);
             await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
         }
         catch
         {
@@ -125,6 +128,7 @@ public class OfficeService : IOfficeService
 
             _mapper.Map(editOfficeInformationDto, existingOffice);
             await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
         }
         catch
         {

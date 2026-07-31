@@ -59,6 +59,7 @@ public class PatientService : IPatientService
             _unitOfWork.Accounts.Add(account);
             _unitOfWork.Patients.Add(patient);
             await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
 
             return _mapper.Map<PatientDto>(patient);
         }
@@ -139,6 +140,7 @@ public class PatientService : IPatientService
             patient.Account.UpdatedBy = editdById ?? patient.Account.Id;
 
             await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
             return _mapper.Map<PatientDto>(patient);
         }
         catch
@@ -164,6 +166,7 @@ public class PatientService : IPatientService
             _unitOfWork.Accounts.Delete(patient.Account);
 
             await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
         }
         catch
         {
