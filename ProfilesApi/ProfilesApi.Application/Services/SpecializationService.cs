@@ -52,7 +52,7 @@ public class SpecializationService : ISpecializationService
         }
         catch
         {
-            await _unitOfWork.RollbackTransactionAsync(ct); // Исправлено с CompleteAsync на Rollback
+            await _unitOfWork.RollbackTransactionAsync(ct);
             throw;
         }
     }
