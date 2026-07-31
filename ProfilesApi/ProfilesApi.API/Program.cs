@@ -67,6 +67,7 @@ try
         catch (Exception ex)
         {
             Log.Error(ex, "An error occurred while migrating the database.");
+            throw;
         }
     }
     
