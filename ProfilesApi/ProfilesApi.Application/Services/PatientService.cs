@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+using System.Data;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using ProfilesApi.Application.Dto.Patients;
 using ProfilesApi.Application.Interfaces;
@@ -27,43 +28,55 @@ public class PatientService : IPatientService
 
     public async Task<PatientDto> CreatePatientAsync(RegisterPatientDto registerPatientDto, Guid? createdById = null, CancellationToken ct = default)
     {
-        _logger.LogInformation("Creating new patient account for Email: {Email}.", registerPatientDto.Email);
-        var emailExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Email == registerPatientDto.Email, ct);
-        var numberExists = await _unitOfWork.Accounts.ExistsAsync(a=> a.PhoneNumber == registerPatientDto.PhoneNumber, ct);
-
-        if (emailExists)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            _logger.LogWarning("Patient creation failed. Email {Email} is already in use.", registerPatientDto.Email);
-            throw new ConflictException("Email is already in use by another account.");
-        }
+            _logger.LogInformation("Creating new patient account for Email: {Email}.", registerPatientDto.Email);
+            
+            var emailExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Email == registerPatientDto.Email, ct);
+            var numberExists = await _unitOfWork.Accounts.ExistsAsync(a => a.PhoneNumber == registerPatientDto.PhoneNumber, ct);
 
-        if (numberExists)
-        {
-            _logger.LogWarning("Patient creation failed. Phone number {PhoneNumber} is already in use.", registerPatientDto.PhoneNumber);
-            throw new ConflictException("Phone number is already in use by another account.");
-        }
+            if (emailExists)
+            {
+                _logger.LogWarning("Patient creation failed. Email {Email} is already in use.", registerPatientDto.Email);
+                throw new ConflictException("Email is already in use by another account.");
+            }
 
-        var patient = _mapper.Map<Patient>(registerPatientDto);
-        var account = _mapper.Map<Account>(registerPatientDto);
-        
-        if (!createdById.HasValue || createdById == Guid.Empty)
-        {
-            createdById = account.Id;
+            if (numberExists)
+            {
+                _logger.LogWarning("Patient creation failed. Phone number {PhoneNumber} is already in use.", registerPatientDto.PhoneNumber);
+                throw new ConflictException("Phone number is already in use by another account.");
+            }
+
+            var patient = _mapper.Map<Patient>(registerPatientDto);
+            var account = _mapper.Map<Account>(registerPatientDto);
+
+            if (!createdById.HasValue || createdById == Guid.Empty)
+            {
+                createdById = account.Id;
+            }
+
+            account.CreatedBy = createdById.Value;
+            account.UpdatedBy = createdById.Value;
+            account.PasswordHash = _passwordHasher.HashPassword(registerPatientDto.Password);
+
+            patient.AccountId = account.Id;
+            patient.Account = account;
+
+            _unitOfWork.Accounts.Add(account);
+            _unitOfWork.Patients.Add(patient);
+            
+            await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
+
+            _logger.LogInformation("Successfully created patient with ID: {PatientId}.", patient.Id);
+            return _mapper.Map<PatientDto>(patient);
         }
-        
-        account.CreatedBy = createdById.Value;
-        account.UpdatedBy = createdById.Value;
-        account.PasswordHash = _passwordHasher.HashPassword(registerPatientDto.Password);
-        
-        patient.AccountId = account.Id;
-        patient.Account = account;
-        
-        _unitOfWork.Accounts.Add(account);
-        _unitOfWork.Patients.Add(patient);
-        await _unitOfWork.CompleteAsync(ct);
-        
-        _logger.LogInformation("Successfully created patient with ID: {PatientId}.", patient.Id);
-        return _mapper.Map<PatientDto>(patient);
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 
     public async Task<PatientDto> GetPatientAsync(Guid id, CancellationToken ct = default)
@@ -113,56 +126,78 @@ public class PatientService : IPatientService
 
     public async Task<PatientDto> EditPatientAsync(EditPatientProfileDto editPatientProfileDto, Guid? editdById = null, CancellationToken ct = default)
     {
-        _logger.LogInformation("Editing patient with ID: {PatientId}.", editPatientProfileDto.Id);
-        var patient = await _unitOfWork.Patients.GetWithDetailsAsync(editPatientProfileDto.Id, ct);
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
+        {
+            _logger.LogInformation("Editing patient with ID: {PatientId}.", editPatientProfileDto.Id);
+            var patient = await _unitOfWork.Patients.GetWithDetailsAsync(editPatientProfileDto.Id, ct);
 
-        if (patient == null)
-        {
-            _logger.LogWarning("Failed to edit patient. Patient with ID '{PatientId}' was not found.", editPatientProfileDto.Id);
-            throw new NotFoundException($"Patient with ID '{editPatientProfileDto.Id}' was not found.");
+            if (patient == null)
+            {
+                _logger.LogWarning("Failed to edit patient. Patient with ID '{PatientId}' was not found.", editPatientProfileDto.Id);
+                throw new NotFoundException($"Patient with ID '{editPatientProfileDto.Id}' was not found.");
+            }
+
+            var phoneExists = await _unitOfWork.Accounts.ExistsAsync(
+                a => a.Id != patient.AccountId && a.PhoneNumber == editPatientProfileDto.PhoneNumber, ct);
+            if (phoneExists)
+            {
+                _logger.LogWarning("Failed to edit patient. Phone number {PhoneNumber} is already in use.", editPatientProfileDto.PhoneNumber);
+                throw new ConflictException("Phone number is already in use by another account.");
+            }
+
+            var emailExists = await _unitOfWork.Accounts.ExistsAsync(
+                a => a.Id != patient.AccountId && a.Email == editPatientProfileDto.Email, ct);
+            if (emailExists)
+            {
+                _logger.LogWarning("Failed to edit patient. Email {Email} is already in use.", editPatientProfileDto.Email);
+                throw new ConflictException("Email is already in use by another account.");
+            }
+
+            _mapper.Map(editPatientProfileDto, patient);
+
+            patient.Account.UpdatedBy = editdById ?? patient.Account.Id;
+
+            await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            _logger.LogInformation("Patient with ID: {PatientId} successfully updated.", patient.Id);
+            return _mapper.Map<PatientDto>(patient);
         }
-        
-        var phoneExists = await _unitOfWork.Accounts.ExistsAsync(
-            a => a.Id != patient.AccountId && a.PhoneNumber == editPatientProfileDto.PhoneNumber, ct);
-        if (phoneExists)
+        catch
         {
-            _logger.LogWarning("Failed to edit patient. Phone number {PhoneNumber} is already in use.", editPatientProfileDto.PhoneNumber);
-            throw new ConflictException("Phone number is already in use by another account.");
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
         }
-        
-        var emailExists = await _unitOfWork.Accounts.ExistsAsync(
-            a => a.Id != patient.AccountId && a.Email == editPatientProfileDto.Email, ct);
-        if (emailExists)
-        {
-            _logger.LogWarning("Failed to edit patient. Email {Email} is already in use.", editPatientProfileDto.Email);
-            throw new ConflictException("Email is already in use by another account.");
-        }
-        
-        _mapper.Map(editPatientProfileDto, patient);
-        
-        patient.Account.UpdatedBy = editdById ?? patient.Account.Id;
-        
-        await _unitOfWork.CompleteAsync(ct);
-        _logger.LogInformation("Patient with ID: {PatientId} successfully updated.", patient.Id);
-        return _mapper.Map<PatientDto>(patient);
     }
 
     public async Task DeletePatientAsync(Guid id, CancellationToken ct = default)
     {
-        _logger.LogInformation("Deleting patient with ID: {PatientId}", id);
-        var patient = await _unitOfWork.Patients.GetWithDetailsAsync(id, ct);
-
-        if (patient == null)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            _logger.LogWarning("Failed to delete patient. Patient with ID '{PatientId}' was not found.", id);
-            throw new NotFoundException($"Patient with ID '{id}' was not found.");
-        }
-        
-        _unitOfWork.Patients.Delete(patient);
-        _unitOfWork.Accounts.Delete(patient.Account);
+            _logger.LogInformation("Deleting patient with ID: {PatientId}", id);
+            var patient = await _unitOfWork.Patients.GetWithDetailsAsync(id, ct);
 
-        await _unitOfWork.CompleteAsync(ct);
-        _logger.LogInformation("Successfully deleted patient with ID: {PatientId}", id);
+            if (patient == null)
+            {
+                _logger.LogWarning("Failed to delete patient. Patient with ID '{PatientId}' was not found.", id);
+                throw new NotFoundException($"Patient with ID '{id}' was not found.");
+            }
+
+            _unitOfWork.Patients.Delete(patient);
+            _unitOfWork.Accounts.Delete(patient.Account);
+
+            await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            _logger.LogInformation("Successfully deleted patient with ID: {PatientId}", id);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 
     public async Task<PatientDto> GetByAccountIdAsync(Guid accountId, CancellationToken ct = default)

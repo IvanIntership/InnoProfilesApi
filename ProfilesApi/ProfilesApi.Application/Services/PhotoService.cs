@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+using System.Data;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using ProfilesApi.Application.Dto.Photos;
 using ProfilesApi.Application.Interfaces;
@@ -42,53 +43,76 @@ public class PhotoService : IPhotoService
 
     public async Task DeletePhotoAsync(Guid photoId, CancellationToken ct = default)
     {
-        _logger.LogInformation("Deleting photo with ID: {PhotoId}", photoId);
-        var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
-
-        if (photo == null)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            _logger.LogWarning("Failed to delete photo. Photo with ID '{PhotoId}' was not found.", photoId);
-            throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
-        }
+            _logger.LogInformation("Deleting photo with ID: {PhotoId}", photoId);
+            var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
 
-        if (!string.IsNullOrWhiteSpace(photo.Url))
+            if (photo == null)
+            {
+                _logger.LogWarning("Failed to delete photo. Photo with ID '{PhotoId}' was not found.", photoId);
+                throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
+            }
+
+            // Важная логика удаления физического файла из твоей ветки improvement
+            if (!string.IsNullOrWhiteSpace(photo.Url))
+            {
+                _fileStorageService.DeletePhoto(photo.Url, ct);
+            }
+
+            _unitOfWork.Photos.Delete(photo);
+            
+            await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            _logger.LogInformation("Successfully deleted photo with ID: {PhotoId}", photoId);
+        }
+        catch
         {
-            _fileStorageService.DeletePhoto(photo.Url, ct);
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
         }
-
-        _unitOfWork.Photos.Delete(photo);
-        await _unitOfWork.CompleteAsync(ct);
-        
-        _logger.LogInformation("Successfully deleted photo with ID: {PhotoId}", photoId);
     }
     
     public async Task<(Stream Stream, string ContentType)> GetPhotoAsync(Guid photoId, CancellationToken ct = default)
     {
-        _logger.LogInformation("Trying to get photo stream with ID: {PhotoId}", photoId);
-        var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
-
-        if (photo == null)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            _logger.LogWarning("Failed to retrieve photo. Photo with ID '{PhotoId}' was not found.", photoId);
-            throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
-        }
+            _logger.LogInformation("Trying to get photo stream with ID: {PhotoId}", photoId);
+            var photo = await _unitOfWork.Photos.GetByIdAsync(photoId, ct);
 
-        var fileName = Path.GetFileName(photo.Url);
-        
-        if (string.IsNullOrWhiteSpace(fileName))
+            if (photo == null)
+            {
+                _logger.LogWarning("Failed to retrieve photo. Photo with ID '{PhotoId}' was not found.", photoId);
+                throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
+            }
+
+            var fileName = Path.GetFileName(photo.Url);
+            
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                _logger.LogWarning("Failed to retrieve photo. Invalid or empty filename in URL for photo ID '{PhotoId}'.", photoId);
+                throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
+            }
+
+            var fileResult = await _fileStorageService.GetPhotoAsync(fileName, ct);
+            if (fileResult == null)
+            {
+                _logger.LogWarning("Failed to retrieve photo stream. Physical file for photo ID '{PhotoId}' was not found on storage.", photoId);
+                throw new NotFoundException($"Physical file for photo ID '{photoId}' was not found on storage.");
+            }
+            
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            _logger.LogInformation("Photo stream for ID: {PhotoId} successfully retrieved.", photoId);
+            return fileResult.Value;
+        }
+        catch
         {
-            _logger.LogWarning("Failed to retrieve photo. Invalid or empty filename in URL for photo ID '{PhotoId}'.", photoId);
-            throw new NotFoundException($"Photo with ID '{photoId}' was not found.");
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
         }
-
-        var fileResult = await _fileStorageService.GetPhotoAsync(fileName, ct);
-        if (fileResult == null)
-        {
-            _logger.LogWarning("Failed to retrieve photo stream. Physical file for photo ID '{PhotoId}' was not found on storage.", photoId);
-            throw new NotFoundException($"Physical file for photo ID '{photoId}' was not found on storage.");
-        }
-
-        _logger.LogInformation("Photo stream for ID: {PhotoId} successfully retrieved.", photoId);
-        return fileResult.Value;
     }
 }

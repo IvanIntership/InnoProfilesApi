@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+using System.Data;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using ProfilesApi.Application.Dto.Doctors;
 using ProfilesApi.Application.Interfaces;
@@ -27,128 +28,160 @@ public class DoctorService : IDoctorService
 
     public async Task<DoctorDto> CreateDoctorAsync(CreateDoctorDto createDoctorDto, Guid? createdById = null, CancellationToken ct = default)
     {
-        _logger.LogInformation("Creating new doctor account for Email: {Email}.", createDoctorDto.Email);
-        var emailExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Email == createDoctorDto.Email, ct);
-        var numberExists = await _unitOfWork.Accounts.ExistsAsync(a=> a.PhoneNumber == createDoctorDto.PhoneNumber, ct);
-
-        if (emailExists)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            _logger.LogWarning("Doctor creation failed. Email {Email} is already in use.", createDoctorDto.Email);
-            throw new ConflictException("Email is already in use by another account.");
+            _logger.LogInformation("Creating new doctor account for Email: {Email}.", createDoctorDto.Email);
+            var emailExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Email == createDoctorDto.Email, ct);
+            var numberExists = await _unitOfWork.Accounts.ExistsAsync(a=> a.PhoneNumber == createDoctorDto.PhoneNumber, ct);
+
+            if (emailExists)
+            {
+                _logger.LogWarning("Doctor creation failed. Email {Email} is already in use.", createDoctorDto.Email);
+                throw new ConflictException("Email is already in use by another account.");
+            }
+
+            if (numberExists)
+            {
+                _logger.LogWarning("Doctor creation failed. Phone number {PhoneNumber} is already in use.", createDoctorDto.PhoneNumber);
+                throw new ConflictException("Phone number is already in use by another account.");
+            }
+            
+            var officeExists = await _unitOfWork.Offices.ExistsAsync(o => o.Id == createDoctorDto.OfficeId, ct);
+            if (!officeExists)
+            {
+                _logger.LogWarning("Doctor creation failed. OfficeId {OfficeId} was not found.", createDoctorDto.OfficeId);
+                throw new NotFoundException($"Office with ID '{createDoctorDto.OfficeId}' was not found.");
+            }
+            
+            var specializationExists = await _unitOfWork.Specializations.ExistsAsync(o => o.Id == createDoctorDto.SpecializationId, ct);
+            if (!specializationExists)
+            {
+                _logger.LogWarning("Doctor creation failed. SpecializationId {SpecializationId} was not found.", createDoctorDto.SpecializationId);
+                throw new NotFoundException($"Specialization with ID '{createDoctorDto.SpecializationId}' was not found.");
+            }
+            
+            var account = _mapper.Map<Account>(createDoctorDto);
+
+            if (!createdById.HasValue || createdById == Guid.Empty)
+            {
+                createdById = account.Id;
+            } 
+            
+            account.CreatedBy = createdById.Value;
+            account.UpdatedBy = createdById.Value;
+            account.PasswordHash = _passwordHasher.HashPassword(createDoctorDto.Password);
+
+            var doctor = _mapper.Map<Doctor>(createDoctorDto);
+
+            doctor.AccountId = account.Id;
+            doctor.Account = account;
+        
+            _unitOfWork.Accounts.Add(account);
+            _unitOfWork.Doctors.Add(doctor);
+
+            await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            _logger.LogInformation("Successfully created doctor with ID: {DoctorId} for OfficeId: {OfficeId}.", doctor.Id, doctor.OfficeId);
+            return _mapper.Map<DoctorDto>(doctor);
         }
-
-        if (numberExists)
+        catch
         {
-            _logger.LogWarning("Doctor creation failed. Phone number {PhoneNumber} is already in use.", createDoctorDto.PhoneNumber);
-            throw new ConflictException("Phone number is already in use by another account.");
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
         }
-        
-        var officeExists = await _unitOfWork.Offices.ExistsAsync(o => o.Id == createDoctorDto.OfficeId, ct);
-        if (!officeExists)
-        {
-            _logger.LogWarning("Doctor creation failed. OfficeId {OfficeId} was not found.", createDoctorDto.OfficeId);
-            throw new NotFoundException($"Office with ID '{createDoctorDto.OfficeId}' was not found.");
-        }
-        
-        var specializationExists = await _unitOfWork.Specializations.ExistsAsync(o => o.Id == createDoctorDto.SpecializationId, ct);
-        if (!specializationExists)
-        {
-            _logger.LogWarning("Doctor creation failed. SpecializationId {SpecializationId} was not found.", createDoctorDto.SpecializationId);
-            throw new NotFoundException($"Specialization with ID '{createDoctorDto.SpecializationId}' was not found.");
-        }
-        
-        var account = _mapper.Map<Account>(createDoctorDto);
-
-        if (!createdById.HasValue || createdById == Guid.Empty)
-        {
-            createdById = account.Id;
-        } 
-        
-        account.CreatedBy = createdById.Value;
-        account.UpdatedBy = createdById.Value;
-        account.PasswordHash = _passwordHasher.HashPassword(createDoctorDto.Password);
-
-        var doctor = _mapper.Map<Doctor>(createDoctorDto);
-
-        doctor.AccountId = account.Id;
-        doctor.Account = account;
-        
-        _unitOfWork.Accounts.Add(account);
-        _unitOfWork.Doctors.Add(doctor);
-
-        await _unitOfWork.CompleteAsync(ct);
-        
-        _logger.LogInformation("Successfully created doctor with ID: {DoctorId} for OfficeId: {OfficeId}.", doctor.Id, doctor.OfficeId);
-        return _mapper.Map<DoctorDto>(doctor);
     }
 
     public async Task DeleteDoctorAsync(Guid id, CancellationToken ct = default)
     {
-        _logger.LogInformation("Deleting doctor with ID: {DoctorId}", id);
-        var doctor = await _unitOfWork.Doctors.GetWithDetailsAsync(id, ct);
-
-        if (doctor == null)
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
         {
-            _logger.LogWarning("Failed to delete doctor. Doctor with ID '{DoctorId}' was not found.", id);
-            throw new NotFoundException($"Doctor with ID '{id}' was not found.");
-        }
-        
-        _unitOfWork.Doctors.Delete(doctor);
-        _unitOfWork.Accounts.Delete(doctor.Account);
+            _logger.LogInformation("Deleting doctor with ID: {DoctorId}", id);
+            var doctor = await _unitOfWork.Doctors.GetWithDetailsAsync(id, ct);
 
-        await _unitOfWork.CompleteAsync(ct);
-        _logger.LogInformation("Successfully deleted doctor with ID: {DoctorId}", id);
+            if (doctor == null)
+            {
+                _logger.LogWarning("Failed to delete doctor. Doctor with ID '{DoctorId}' was not found.", id);
+                throw new NotFoundException($"Doctor with ID '{id}' was not found.");
+            }
+        
+            _unitOfWork.Doctors.Delete(doctor);
+            _unitOfWork.Accounts.Delete(doctor.Account);
+
+            await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            _logger.LogInformation("Successfully deleted doctor with ID: {DoctorId}", id);
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
+        }
     }
 
     public async Task<DoctorDto> EditDoctorProfileAsync(EditDoctorProfileDto editDoctorProfileDto, Guid? editedById = null,
         CancellationToken ct = default)
     {
-        _logger.LogInformation("Editing doctor with ID: {DoctorId}.", editDoctorProfileDto.Id);
-        var doctor = await _unitOfWork.Doctors.GetWithDetailsAsync(editDoctorProfileDto.Id, ct);
+        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        try
+        {
+            _logger.LogInformation("Editing doctor with ID: {DoctorId}.", editDoctorProfileDto.Id);
+            var doctor = await _unitOfWork.Doctors.GetWithDetailsAsync(editDoctorProfileDto.Id, ct);
 
-        if (doctor == null)
-        {
-            _logger.LogWarning("Failed to edit doctor. Doctor with ID '{DoctorId}' was not found.", editDoctorProfileDto.Id);
-            throw new NotFoundException($"Doctor with ID '{editDoctorProfileDto.Id}' was not found.");
+            if (doctor == null)
+            {
+                _logger.LogWarning("Failed to edit doctor. Doctor with ID '{DoctorId}' was not found.", editDoctorProfileDto.Id);
+                throw new NotFoundException($"Doctor with ID '{editDoctorProfileDto.Id}' was not found.");
+            }
+            
+            var officeExists = await _unitOfWork.Offices.ExistsAsync(o => o.Id == editDoctorProfileDto.OfficeId, ct);
+            if (!officeExists)
+            {
+                _logger.LogWarning("Failed to edit doctor. OfficeId {OfficeId} was not found.", editDoctorProfileDto.OfficeId);
+                throw new NotFoundException($"Office with ID '{editDoctorProfileDto.OfficeId}' was not found.");
+            }
+            
+            var specializationExists = await _unitOfWork.Specializations.ExistsAsync(o => o.Id == editDoctorProfileDto.SpecializationId, ct);
+            if (!specializationExists)
+            {
+                _logger.LogWarning("Failed to edit doctor. SpecializationId {SpecializationId} was not found.", editDoctorProfileDto.SpecializationId);
+                throw new NotFoundException($"Specialization with ID '{editDoctorProfileDto.SpecializationId}' was not found.");
+            }
+            
+            var phoneExists = await _unitOfWork.Accounts.ExistsAsync(
+                a => a.Id != doctor.AccountId && a.PhoneNumber == editDoctorProfileDto.PhoneNumber, ct);
+            if (phoneExists)
+            {
+                _logger.LogWarning("Failed to edit doctor. Phone number {PhoneNumber} is already in use.", editDoctorProfileDto.PhoneNumber);
+                throw new ConflictException("Phone number is already in use by another account.");
+            }
+            
+            var emailExists = await _unitOfWork.Accounts.ExistsAsync(
+                a => a.Id != doctor.AccountId && a.Email == editDoctorProfileDto.Email, ct);
+            if (emailExists)
+            {
+                _logger.LogWarning("Failed to edit doctor. Email {Email} is already in use.", editDoctorProfileDto.Email);
+                throw new ConflictException("Email is already in use by another account.");
+            }
+            
+            _mapper.Map(editDoctorProfileDto, doctor);
+            
+            doctor.Account.UpdatedBy = editedById ?? doctor.Account.Id;
+            
+            await _unitOfWork.CompleteAsync(ct);
+            await _unitOfWork.CommitTransactionAsync(ct);
+            
+            _logger.LogInformation("Doctor with ID: {DoctorId} successfully updated.", doctor.Id);
+            return _mapper.Map<DoctorDto>(doctor);
         }
-        
-        var officeExists = await _unitOfWork.Offices.ExistsAsync(o => o.Id == editDoctorProfileDto.OfficeId, ct);
-        if (!officeExists)
+        catch
         {
-            _logger.LogWarning("Failed to edit doctor. OfficeId {OfficeId} was not found.", editDoctorProfileDto.OfficeId);
-            throw new NotFoundException($"Office with ID '{editDoctorProfileDto.OfficeId}' was not found.");
+            await _unitOfWork.RollbackTransactionAsync(ct);
+            throw;
         }
-        
-        var specializationExists = await _unitOfWork.Specializations.ExistsAsync(o => o.Id == editDoctorProfileDto.SpecializationId, ct);
-        if (!specializationExists)
-        {
-            _logger.LogWarning("Failed to edit doctor. SpecializationId {SpecializationId} was not found.", editDoctorProfileDto.SpecializationId);
-            throw new NotFoundException($"Specialization with ID '{editDoctorProfileDto.SpecializationId}' was not found.");
-        }
-        
-        var phoneExists = await _unitOfWork.Accounts.ExistsAsync(
-            a => a.Id != doctor.AccountId && a.PhoneNumber == editDoctorProfileDto.PhoneNumber, ct);
-        if (phoneExists)
-        {
-            _logger.LogWarning("Failed to edit doctor. Phone number {PhoneNumber} is already in use.", editDoctorProfileDto.PhoneNumber);
-            throw new ConflictException("Phone number is already in use by another account.");
-        }
-        
-        var emailExists = await _unitOfWork.Accounts.ExistsAsync(
-            a => a.Id != doctor.AccountId && a.Email == editDoctorProfileDto.Email, ct);
-        if (emailExists)
-        {
-            _logger.LogWarning("Failed to edit doctor. Email {Email} is already in use.", editDoctorProfileDto.Email);
-            throw new ConflictException("Email is already in use by another account.");
-        }
-        
-        _mapper.Map(editDoctorProfileDto, doctor);
-        
-        doctor.Account.UpdatedBy = editedById ?? doctor.Account.Id;
-        
-        await _unitOfWork.CompleteAsync(ct);
-        _logger.LogInformation("Doctor with ID: {DoctorId} successfully updated.", doctor.Id);
-        return _mapper.Map<DoctorDto>(doctor);
     }
 
     public async Task<DoctorDto> GetDoctorAsync(Guid id, CancellationToken ct = default)

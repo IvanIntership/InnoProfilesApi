@@ -1,4 +1,7 @@
-﻿using ProfilesApi.Application.Interfaces;
+﻿using System.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Interfaces;
 using ProfilesApi.Infrastructure.Data;
 
@@ -14,6 +17,8 @@ public class UnitOfWork : IUnitOfWork
     private readonly Lazy<IPhotoRepository> _photosRepository;
     private readonly Lazy<ISpecializationRepository> _specializationsRepository;
     private readonly AppDbContext _context;
+    private bool _disposed;
+    private IDbContextTransaction? _currentTransaction; 
 
     public UnitOfWork(AppDbContext context)
     {
@@ -41,8 +46,75 @@ public class UnitOfWork : IUnitOfWork
         return await _context.SaveChangesAsync(ct);
     }
 
+    public async Task BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken ct = default)
+    {
+        if (_currentTransaction != null) return;
+        _currentTransaction = await _context.Database.BeginTransactionAsync(isolationLevel, ct);
+    }
+
+    public async Task CommitTransactionAsync(CancellationToken ct = default)
+    {
+        if (_currentTransaction == null) return;
+
+        try
+        {
+            await _currentTransaction.CommitAsync(ct);
+        }
+        finally
+        {
+            await _currentTransaction.DisposeAsync();
+            _currentTransaction = null;
+        }
+    }
+
+    public async Task RollbackTransactionAsync(CancellationToken ct = default)
+    {
+        if (_currentTransaction == null) return;
+
+        try
+        {
+            await _currentTransaction.RollbackAsync(ct);
+        }
+        finally
+        {
+            await _currentTransaction.DisposeAsync();
+            _currentTransaction = null;
+        }
+    }
+
     public int Complete()
     {
         return _context.SaveChanges();
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            if (_currentTransaction != null)
+            {
+                _currentTransaction.Dispose();
+                _currentTransaction = null;
+            }
+            _context.Dispose();
+            _disposed = true;
+        }
+        GC.SuppressFinalize(this);
+    }
+    
+    public async ValueTask DisposeAsync()
+    {
+        if (!_disposed)
+        {
+            if (_currentTransaction != null)
+            {
+                await _currentTransaction.DisposeAsync();
+                _currentTransaction = null;
+            }
+
+            await _context.DisposeAsync();
+            _disposed = true;
+        }
+        GC.SuppressFinalize(this);
     }
 }
