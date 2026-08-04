@@ -2,7 +2,7 @@
 
 namespace ProfilesApi.Application.Dto.Administrators;
 
-public record AdministratorDto
+public sealed record AdministratorDto
 {
     public Guid Id { get; init; }
     public Guid AccountId { get; init; }

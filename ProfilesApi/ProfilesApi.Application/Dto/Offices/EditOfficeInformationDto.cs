@@ -1,6 +1,6 @@
 ﻿namespace ProfilesApi.Application.Dto.Offices;
 
-public record EditOfficeInformationDto
+public sealed record EditOfficeInformationDto
 {
     public Guid Id { get; init; }
     public string Address { get; init; }

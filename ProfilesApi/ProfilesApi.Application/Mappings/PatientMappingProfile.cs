@@ -4,7 +4,7 @@ using ProfilesApi.Domain.Entities;
 
 namespace ProfilesApi.Application.Mappings;
 
-public class PatientMappingProfile : Profile
+public sealed class PatientMappingProfile : Profile
 {
     public PatientMappingProfile()
     {

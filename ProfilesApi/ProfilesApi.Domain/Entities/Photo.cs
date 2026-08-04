@@ -2,7 +2,7 @@
 
 namespace ProfilesApi.Domain.Entities;
 
-public class Photo : BaseEntity
+public sealed class Photo : BaseEntity
 {
     public string? Url { get; set; }
     

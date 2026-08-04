@@ -5,7 +5,7 @@ using ProfilesApi.Infrastructure.Data;
 
 namespace ProfilesApi.Infrastructure.Repositories;
 
-public class SpecializationRepository : GenericRepository<Specialization>, ISpecializationRepository
+public sealed class SpecializationRepository : GenericRepository<Specialization>, ISpecializationRepository
 {
     public SpecializationRepository(AppDbContext context) : base(context)
     {

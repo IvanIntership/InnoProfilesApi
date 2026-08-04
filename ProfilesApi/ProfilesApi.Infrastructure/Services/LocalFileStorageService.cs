@@ -6,7 +6,7 @@ using ProfilesApi.Application.Interfaces;
 
 namespace ProfilesApi.Infrastructure.Services;
 
-public class LocalFileStorageService : IFileStorageService
+public sealed class LocalFileStorageService : IFileStorageService
 {
     private readonly string _currentDirectory;
     private readonly PhysicalFileProvider _fileProvider;

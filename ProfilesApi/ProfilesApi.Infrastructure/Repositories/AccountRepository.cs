@@ -5,7 +5,7 @@ using ProfilesApi.Infrastructure.Data;
 
 namespace ProfilesApi.Infrastructure.Repositories;
 
-public class AccountRepository : GenericRepository<Account>, IAccountRepository
+public sealed class AccountRepository : GenericRepository<Account>, IAccountRepository
 {
     public AccountRepository(AppDbContext context) : base(context)
     {

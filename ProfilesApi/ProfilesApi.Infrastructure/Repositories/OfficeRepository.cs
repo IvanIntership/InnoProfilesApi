@@ -5,7 +5,7 @@ using ProfilesApi.Infrastructure.Data;
 
 namespace ProfilesApi.Infrastructure.Repositories;
 
-public class OfficeRepository : GenericRepository<Office>, IOfficeRepository
+public sealed class OfficeRepository : GenericRepository<Office>, IOfficeRepository
 {
     public OfficeRepository(AppDbContext context) : base(context)
     {

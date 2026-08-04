@@ -5,7 +5,7 @@ using ProfilesApi.Infrastructure.Data;
 
 namespace ProfilesApi.Infrastructure.Repositories;
 
-public class AdministratorRepository : GenericRepository<Administrator>, IAdministratorRepository
+public sealed class AdministratorRepository : GenericRepository<Administrator>, IAdministratorRepository
 {
     public AdministratorRepository(AppDbContext context) : base(context)
     {

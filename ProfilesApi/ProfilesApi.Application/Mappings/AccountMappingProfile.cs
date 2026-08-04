@@ -8,7 +8,7 @@ using ProfilesApi.Domain.Enums;
 
 namespace ProfilesApi.Application.Mappings;
 
-public class AccountMappingProfile : Profile
+public sealed class AccountMappingProfile : Profile
 {
     public AccountMappingProfile()
     {

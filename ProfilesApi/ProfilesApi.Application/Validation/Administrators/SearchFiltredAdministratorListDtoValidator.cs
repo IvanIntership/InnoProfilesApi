@@ -4,7 +4,7 @@ using ProfilesApi.Application.Validation.Shared;
 
 namespace ProfilesApi.Application.Validation.Administrators;
 
-public class SearchFilteredAdministratorValidator : AbstractValidator<SearchFilteredAdministratorListDto>
+public sealed class SearchFilteredAdministratorValidator : AbstractValidator<SearchFilteredAdministratorListDto>
 {
     public SearchFilteredAdministratorValidator()
     {

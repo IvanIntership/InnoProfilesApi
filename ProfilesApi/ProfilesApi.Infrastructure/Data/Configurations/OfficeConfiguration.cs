@@ -4,7 +4,7 @@ using ProfilesApi.Domain.Entities;
 
 namespace ProfilesApi.Infrastructure.Data.Configurations;
 
-public class OfficeConfiguration : IEntityTypeConfiguration<Office>
+public sealed class OfficeConfiguration : IEntityTypeConfiguration<Office>
 {
     public void Configure(EntityTypeBuilder<Office> builder)
     {

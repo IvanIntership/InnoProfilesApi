@@ -13,7 +13,7 @@ namespace ProfilesApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260714131528_FixDeleteBehavior")]
-    partial class FixDeleteBehavior
+    sealed partial class FixDeleteBehavior
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

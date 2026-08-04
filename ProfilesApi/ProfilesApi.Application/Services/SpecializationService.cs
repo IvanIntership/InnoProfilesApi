@@ -9,7 +9,7 @@ using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
-public class SpecializationService : ISpecializationService
+public sealed class SpecializationService : ISpecializationService
 {
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;

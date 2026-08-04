@@ -5,7 +5,7 @@ using ProfilesApi.Domain.Entities;
 
 namespace ProfilesApi.Application.Mappings;
 
-public class OfficeMappingProfile : Profile
+public sealed class OfficeMappingProfile : Profile
 {
     public OfficeMappingProfile()
     {

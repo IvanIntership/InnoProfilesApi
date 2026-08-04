@@ -2,14 +2,14 @@
 
 namespace ProfilesApi.Domain.Entities;
 
-public class Doctor : SoftDeletableEntity
+public sealed class Doctor : SoftDeletableEntity
 {
     public Guid AccountId { get; set; }
-    public virtual Account Account { get; set; }
+    public Account Account { get; set; }
     public Guid SpecializationId { get; init; }
-    public virtual Specialization Specialization { get; set; }
+    public Specialization Specialization { get; set; }
     public Guid OfficeId { get; set; }
-    public virtual Office Office { get; set; }
+    public Office Office { get; set; }
     public DateTime CareerStartDate { get; init; }
     public int GapInMonths { get; set; }
     public string Degree { get; set; }

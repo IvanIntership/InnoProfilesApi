@@ -7,7 +7,7 @@ using ProfilesApi.Application.Interfaces;
 
 namespace ProfilesApi.Application.Services;
 
-public class PasswordHasher : IPasswordHasher
+public sealed class PasswordHasher : IPasswordHasher
 {
     private readonly byte[] _keyBytes;
     private readonly ILogger<PasswordHasher> _logger;

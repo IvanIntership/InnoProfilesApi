@@ -2,7 +2,7 @@
 
 namespace ProfilesApi.Domain.Exceptions;
 
-public class ConflictException : Exception
+public sealed class ConflictException : Exception
 {
     public ConflictException(string message) : base(message) { }
 }

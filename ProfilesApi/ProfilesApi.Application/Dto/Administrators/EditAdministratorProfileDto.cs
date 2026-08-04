@@ -1,6 +1,6 @@
 ﻿namespace ProfilesApi.Application.Dto.Administrators;
 
-public record EditAdministratorProfileDto
+public sealed record EditAdministratorProfileDto
 {
     public Guid Id { get; init; }
     public string Firstname { get; init; }

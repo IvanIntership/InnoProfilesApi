@@ -2,7 +2,7 @@
 
 namespace ProfilesApi.Application.Dto.Accounts;
 
-public record AccountDto
+public sealed record AccountDto
 {
     public Guid Id { get; init; }
     public string Firstname { get; init; }

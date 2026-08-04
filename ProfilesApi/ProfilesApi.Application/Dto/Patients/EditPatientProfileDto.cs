@@ -1,6 +1,6 @@
 ﻿namespace ProfilesApi.Application.Dto.Patients;
 
-public record EditPatientProfileDto
+public sealed record EditPatientProfileDto
 {
     public Guid Id { get; init; }
     public string Firstname { get; init; }

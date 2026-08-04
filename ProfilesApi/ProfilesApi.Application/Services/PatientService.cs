@@ -8,7 +8,7 @@ using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
-public class PatientService : IPatientService
+public sealed class PatientService : IPatientService
 {
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;

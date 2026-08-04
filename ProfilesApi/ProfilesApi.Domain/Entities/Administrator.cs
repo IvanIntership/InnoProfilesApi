@@ -2,12 +2,12 @@
 
 namespace ProfilesApi.Domain.Entities;
 
-public class Administrator : SoftDeletableEntity
+public sealed class Administrator : SoftDeletableEntity
 {
     public Guid AccountId { get; set; }
-    public virtual Account Account { get; set; }
+    public Account Account { get; set; }
     public Guid OfficeId { get; set; }
-    public virtual Office Office { get; set; }
+    public Office Office { get; set; }
     public DateTime CareerStartDate { get; init; }
     public int GapInMonths { get; set; }
 

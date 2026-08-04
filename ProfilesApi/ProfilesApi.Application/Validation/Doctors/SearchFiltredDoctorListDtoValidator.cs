@@ -4,7 +4,7 @@ using ProfilesApi.Application.Validation.Shared;
 
 namespace ProfilesApi.Application.Validation.Doctors;
 
-public class SearchFiltredDoctorListDtoValidator : AbstractValidator<SearchFilteredDoctorListDto>
+public sealed class SearchFiltredDoctorListDtoValidator : AbstractValidator<SearchFilteredDoctorListDto>
 {
     public SearchFiltredDoctorListDtoValidator()
     {

@@ -2,7 +2,7 @@
 
 namespace ProfilesApi.Application.Dto.Patients;
 
-public record PatientDto
+public sealed record PatientDto
 {
     public Guid Id { get; init; }
     public Guid AccountId { get; init; }

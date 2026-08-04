@@ -9,7 +9,7 @@ namespace ProfilesApi.API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
-public class OfficesController : ControllerBase
+public sealed class OfficesController : ControllerBase
 {
     private readonly IOfficeService _officeService;
     

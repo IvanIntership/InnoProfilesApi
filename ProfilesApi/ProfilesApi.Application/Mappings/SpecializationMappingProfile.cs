@@ -4,7 +4,7 @@ using ProfilesApi.Domain.Entities;
 
 namespace ProfilesApi.Application.Mappings;
 
-public class SpecializationMappingProfile : Profile
+public sealed class SpecializationMappingProfile : Profile
 {
     public SpecializationMappingProfile()
     {

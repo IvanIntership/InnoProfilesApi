@@ -4,7 +4,7 @@ using ProfilesApi.Domain.Entities;
 
 namespace ProfilesApi.Application.Mappings;
 
-public class AdministratorMappingProfile : Profile
+public sealed class AdministratorMappingProfile : Profile
 {
     public AdministratorMappingProfile()
     {
