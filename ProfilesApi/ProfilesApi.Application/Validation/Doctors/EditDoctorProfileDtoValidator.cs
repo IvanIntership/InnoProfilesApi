@@ -4,7 +4,7 @@ using ProfilesApi.Application.Validation.Shared;
 
 namespace ProfilesApi.Application.Validation.Doctors;
 
-public class EditDoctorProfileDtoValidator : AbstractValidator<EditDoctorProfileDto>
+public sealed class EditDoctorProfileDtoValidator : AbstractValidator<EditDoctorProfileDto>
 {
     public EditDoctorProfileDtoValidator()
     {

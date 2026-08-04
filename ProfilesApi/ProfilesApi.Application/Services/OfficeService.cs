@@ -9,7 +9,7 @@ using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
-public class OfficeService : IOfficeService
+public sealed class OfficeService : IOfficeService
 {
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;

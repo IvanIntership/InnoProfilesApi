@@ -1,6 +1,6 @@
 ﻿namespace ProfilesApi.Application.Dto.Doctors;
 
-public record CreateDoctorDto
+public sealed record CreateDoctorDto
 {
     public string Firstname { get; init; }
     public string Lastname { get; init; }

@@ -3,7 +3,7 @@ using ProfilesApi.Application.Dto.Photos;
 
 namespace ProfilesApi.Application.Validation.Photos;
 
-public class PhotoDtoValidator : AbstractValidator<PhotoDto>
+public sealed class PhotoDtoValidator : AbstractValidator<PhotoDto>
 {
     public PhotoDtoValidator()
     {

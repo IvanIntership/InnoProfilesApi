@@ -4,7 +4,7 @@ using ProfilesApi.Application.Validation.Shared;
 
 namespace ProfilesApi.Application.Validation.Patients;
 
-public class RegisterPatientDtoValidator : AbstractValidator<RegisterPatientDto>
+public sealed class RegisterPatientDtoValidator : AbstractValidator<RegisterPatientDto>
 {
     public RegisterPatientDtoValidator()
     {

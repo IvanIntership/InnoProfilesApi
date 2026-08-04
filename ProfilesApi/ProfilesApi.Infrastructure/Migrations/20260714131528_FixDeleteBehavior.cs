@@ -5,7 +5,7 @@
 namespace ProfilesApi.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class FixDeleteBehavior : Migration
+    public sealed partial class FixDeleteBehavior : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

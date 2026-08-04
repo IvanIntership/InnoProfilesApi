@@ -4,7 +4,7 @@ using ProfilesApi.Infrastructure.Data;
 
 namespace ProfilesApi.Infrastructure.Repositories;
 
-public class PhotoRepository : GenericRepository<Photo>, IPhotoRepository
+public sealed class PhotoRepository : GenericRepository<Photo>, IPhotoRepository
 {
     public PhotoRepository(AppDbContext context) : base(context)
     {

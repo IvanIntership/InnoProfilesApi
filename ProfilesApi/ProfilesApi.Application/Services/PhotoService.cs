@@ -8,7 +8,7 @@ using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
-public class PhotoService : IPhotoService
+public sealed class PhotoService : IPhotoService
 {
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;

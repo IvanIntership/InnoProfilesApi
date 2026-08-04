@@ -3,7 +3,7 @@ using ProfilesApi.Application.Dto.Specializations;
 
 namespace ProfilesApi.Application.Validation.Specializations;
 
-public class CreateSpecializationDtoValidator : AbstractValidator<CreateSpecializationDto>
+public sealed class CreateSpecializationDtoValidator : AbstractValidator<CreateSpecializationDto>
 {
     public CreateSpecializationDtoValidator()
     {

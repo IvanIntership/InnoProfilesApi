@@ -5,7 +5,7 @@ using ProfilesApi.Domain.Interfaces;
 
 namespace ProfilesApi.Domain.Entities;
 
-public class Account : SoftDeletableEntity, IAuditable
+public sealed class Account : SoftDeletableEntity, IAuditable
 {
     public string Firstname { get; set; }
     public string Lastname { get; set; }
@@ -15,7 +15,7 @@ public class Account : SoftDeletableEntity, IAuditable
     public string PasswordHash { get; set; }
     public Roles Role { get; set; }
     public Guid? PhotoId { get; set; }
-    public virtual Photo? Photo { get; set; }
+    public Photo? Photo { get; set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public Guid CreatedBy { get; set; }

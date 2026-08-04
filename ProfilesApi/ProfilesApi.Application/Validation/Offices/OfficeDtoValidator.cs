@@ -4,7 +4,7 @@ using ProfilesApi.Application.Validation.Shared;
 
 namespace ProfilesApi.Application.Validation.Offices;
 
-public class OfficeDtoValidator : AbstractValidator<OfficeDto>
+public sealed class OfficeDtoValidator : AbstractValidator<OfficeDto>
 {
     public OfficeDtoValidator()
     {

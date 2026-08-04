@@ -13,7 +13,7 @@ namespace ProfilesApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260714102220_InitialCreate")]
-    partial class InitialCreate
+    sealed partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

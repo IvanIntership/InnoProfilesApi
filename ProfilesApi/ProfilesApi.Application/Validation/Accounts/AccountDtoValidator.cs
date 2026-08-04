@@ -4,7 +4,7 @@ using ProfilesApi.Application.Validation.Shared;
 
 namespace ProfilesApi.Application.Validation.Accounts;
 
-public class AccountDtoValidator : AbstractValidator<AccountDto>
+public sealed class AccountDtoValidator : AbstractValidator<AccountDto>
 {
     public AccountDtoValidator()
     {

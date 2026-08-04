@@ -1,6 +1,6 @@
 ﻿namespace ProfilesApi.Application.Dto.Administrators;
 
-public record CreateAdministratorDto
+public sealed record CreateAdministratorDto
 {
     public string Firstname { get; init; }
     public string Lastname { get; init; }

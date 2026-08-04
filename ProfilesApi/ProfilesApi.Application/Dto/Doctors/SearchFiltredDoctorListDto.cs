@@ -1,6 +1,6 @@
 ﻿namespace ProfilesApi.Application.Dto.Doctors;
 
-public record SearchFilteredDoctorListDto
+public sealed record SearchFilteredDoctorListDto
 {
     public string? SearchTerm { get; init; } = null;
     public Guid? SpecializationId { get; init; } = null;

@@ -4,7 +4,7 @@ using ProfilesApi.Domain.Entities;
 
 namespace ProfilesApi.Application.Mappings;
 
-public class PhotoMappingProfile : Profile
+public sealed class PhotoMappingProfile : Profile
 {
     public PhotoMappingProfile()
     {

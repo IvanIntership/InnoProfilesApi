@@ -3,7 +3,7 @@ using ProfilesApi.Application.Dto.Specializations;
 
 namespace ProfilesApi.Application.Validation.Specializations;
 
-public class SearchQueryDtoValidator : AbstractValidator<SpecializationDto>
+public sealed class SearchQueryDtoValidator : AbstractValidator<SpecializationDto>
 {
     public SearchQueryDtoValidator()
     {

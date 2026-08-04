@@ -5,7 +5,7 @@
 namespace ProfilesApi.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddNavigationProperties : Migration
+    public sealed partial class AddNavigationProperties : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

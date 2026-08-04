@@ -7,7 +7,7 @@ namespace ProfilesApi.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PhotosController : ControllerBase
+public sealed class PhotosController : ControllerBase
 {
     private readonly IPhotoService _photoService;
     

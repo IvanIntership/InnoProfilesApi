@@ -3,12 +3,12 @@ using ProfilesApi.Domain.Common;
 
 namespace ProfilesApi.Domain.Entities;
 
-public class Office : BaseEntity
+public sealed class Office : BaseEntity
 {
     public string Address { get; set; }
     public string PhoneNumber { get; set; }
     public Guid? PhotoId { get; set; }
-    public virtual Photo? Photo { get; set; }
+    public Photo? Photo { get; set; }
     
     public Office(string address, string phoneNumber)
     {

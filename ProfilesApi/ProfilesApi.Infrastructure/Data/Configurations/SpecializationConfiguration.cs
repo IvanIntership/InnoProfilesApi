@@ -4,7 +4,7 @@ using ProfilesApi.Domain.Entities;
 
 namespace ProfilesApi.Infrastructure.Data.Configurations;
 
-public class SpecializationConfiguration : IEntityTypeConfiguration<Specialization>
+public sealed class SpecializationConfiguration : IEntityTypeConfiguration<Specialization>
 {
     public void Configure(EntityTypeBuilder<Specialization> builder)
     {

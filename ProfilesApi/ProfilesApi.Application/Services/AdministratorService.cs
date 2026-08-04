@@ -8,7 +8,7 @@ using ProfilesApi.Domain.Exceptions;
 
 namespace ProfilesApi.Application.Services;
 
-public class AdministratorService : IAdministratorService
+public sealed class AdministratorService : IAdministratorService
 {
     private readonly IMapper _mapper;
     private readonly IUnitOfWork _unitOfWork;

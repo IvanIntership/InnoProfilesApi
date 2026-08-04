@@ -4,7 +4,7 @@ using ProfilesApi.Domain.Entities;
 
 namespace ProfilesApi.Infrastructure.Data.Configurations;
 
-public class AdministratorConfiguration : IEntityTypeConfiguration<Administrator>
+public sealed class AdministratorConfiguration : IEntityTypeConfiguration<Administrator>
 {
     public void Configure(EntityTypeBuilder<Administrator> builder)
     {

@@ -5,7 +5,7 @@ using ProfilesApi.Infrastructure.Data;
 
 namespace ProfilesApi.Infrastructure.Repositories;
 
-public class DoctorRepository : GenericRepository<Doctor>, IDoctorRepository
+public sealed class DoctorRepository : GenericRepository<Doctor>, IDoctorRepository
 {
     public DoctorRepository(AppDbContext context) : base(context)
     {

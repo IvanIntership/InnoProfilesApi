@@ -7,7 +7,7 @@ using ProfilesApi.Infrastructure.Data;
 
 namespace ProfilesApi.Infrastructure.Repositories;
 
-public class UnitOfWork : IUnitOfWork
+public sealed class UnitOfWork : IUnitOfWork
 {
     private readonly Lazy<IAccountRepository> _accountsRepository;
     private readonly Lazy<IAdministratorRepository> _administratorsRepository;

@@ -8,7 +8,7 @@ namespace ProfilesApi.API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
-public class DoctorsController : ControllerBase
+public sealed class DoctorsController : ControllerBase
 {
     private readonly IDoctorService _doctorService;
 

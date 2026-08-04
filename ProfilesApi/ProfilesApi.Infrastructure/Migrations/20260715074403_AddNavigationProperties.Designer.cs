@@ -13,7 +13,7 @@ namespace ProfilesApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260715074403_AddNavigationProperties")]
-    partial class AddNavigationProperties
+    sealed partial class AddNavigationProperties
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
