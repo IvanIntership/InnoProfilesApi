@@ -4,7 +4,7 @@ using ProfilesApi.Application.Validation.Shared;
 
 namespace ProfilesApi.Application.Validation.Specializations;
 
-public class SearchPagedSpecializationDtoValidator : AbstractValidator<SearchPagedSpecializationDto>
+public sealed class SearchPagedSpecializationDtoValidator : AbstractValidator<SearchPagedSpecializationDto>
 {
     public SearchPagedSpecializationDtoValidator()
     {

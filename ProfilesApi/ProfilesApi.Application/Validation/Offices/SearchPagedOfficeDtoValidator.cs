@@ -4,7 +4,7 @@ using ProfilesApi.Application.Validation.Shared;
 
 namespace ProfilesApi.Application.Validation.Offices;
 
-public class SearchPagedOfficeDtoValidator : AbstractValidator<SearchPagedOfficeDto>
+public sealed class SearchPagedOfficeDtoValidator : AbstractValidator<SearchPagedOfficeDto>
 {
     public SearchPagedOfficeDtoValidator()
     {

@@ -4,7 +4,7 @@ using ProfilesApi.Application.Validation.Shared;
 
 namespace ProfilesApi.Application.Validation.Administrators;
 
-public class SearchPagedAdministratorDtoValidator : AbstractValidator<SearchPagedAdministratorDto>
+public sealed class SearchPagedAdministratorDtoValidator : AbstractValidator<SearchPagedAdministratorDto>
 {
     public SearchPagedAdministratorDtoValidator()
     {
