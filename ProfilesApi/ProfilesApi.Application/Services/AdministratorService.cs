@@ -2,6 +2,7 @@ using System.Data;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using ProfilesApi.Application.Dto.Administrators;
+using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
 using ProfilesApi.Domain.Exceptions;
@@ -221,6 +222,50 @@ public sealed class AdministratorService : IAdministratorService
         
         _logger.LogInformation("Retrieved {Count} administrator(s) matching filter", administrators.Count);
         return _mapper.Map<IEnumerable<AdministratorDto>>(administrators);
+    }
+
+    public async Task<PagedResult<AdministratorDto>> GetAdministratorsPagedAsync(
+        SearchPagedAdministratorDto searchPagedAdministratorDto,
+        CancellationToken ct = default)
+    {
+        var searchTerm = searchPagedAdministratorDto?.SearchTerm?.Trim().ToLower();
+        var officeId = searchPagedAdministratorDto?.OfficeId;
+        var pageNumber = searchPagedAdministratorDto?.PageNumber ?? 1;
+        var pageSize = searchPagedAdministratorDto?.PageSize ?? 10;
+
+        _logger.LogInformation(
+            "Fetching paged administrators. PageNumber: {PageNumber}, PageSize: {PageSize}, SearchTerm: {SearchTerm}, OfficeId: {OfficeId}", 
+            pageNumber, pageSize, searchTerm, officeId);
+    
+        var (administrators, totalCount) = await _unitOfWork.Administrators.GetPagedAsync(
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            filter: a => 
+                (!officeId.HasValue || a.OfficeId == officeId.Value) &&
+                (string.IsNullOrWhiteSpace(searchTerm) ||
+                 a.Account.Firstname.ToLower().Contains(searchTerm) ||
+                 a.Account.Lastname.ToLower().Contains(searchTerm) ||
+                 (a.Account.Firstname + " " + a.Account.Lastname).ToLower().Contains(searchTerm) ||
+                 (a.Account.Lastname + " " + a.Account.Firstname).ToLower().Contains(searchTerm)),
+            cancellationToken: ct,
+            includesProperties:
+            [
+                a => a.Account,
+                a => a.Office
+            ]
+        );
+    
+        _logger.LogInformation(
+            "Retrieved page {PageNumber} of administrators ({ItemCount} item(s) on this page, {TotalCount} total matching)", 
+            pageNumber, administrators.Count(), totalCount);
+
+        var dtos = _mapper.Map<IEnumerable<AdministratorDto>>(administrators);
+    
+        return new PagedResult<AdministratorDto>(
+            items: dtos, 
+            totalCount: totalCount, 
+            pageNumber: pageNumber, 
+            pageSize: pageSize);
     }
 
     public async Task<AdministratorDto> GetByAccountIdAsync(Guid accountId, CancellationToken ct = default)

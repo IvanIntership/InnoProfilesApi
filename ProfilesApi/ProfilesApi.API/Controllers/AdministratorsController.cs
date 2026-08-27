@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProfilesApi.Application.Dto.Administrators;
+using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -113,5 +114,21 @@ public sealed class AdministratorsController : ControllerBase
     {
         var administrators = await _administratorService.GetAdministratorsAsync(filteredAdministratorListDto, ct);
         return Ok(administrators);
+    }
+    
+    [HttpPost("search/paged")]
+    [SwaggerOperation(
+        Summary = "Gets a paged list of administrators",
+        Description = "Retrieves a paginated and filtered list of administrators based on search parameters.",
+        OperationId = "GetAdministratorsPaged"
+    )]
+    [SwaggerResponse(StatusCodes.Status200OK, "Paged list of administrators retrieved successfully", typeof(PagedResult<AdministratorDto>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid search or filter parameters")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
+    public async Task<IActionResult> GetAdministratorsPaged(
+        [FromBody] SearchPagedAdministratorDto searchPagedAdministratorDto, CancellationToken ct = default)
+    {
+        var pagedAdministrators = await _administratorService.GetAdministratorsPagedAsync(searchPagedAdministratorDto, ct);
+        return Ok(pagedAdministrators);
     }
 }

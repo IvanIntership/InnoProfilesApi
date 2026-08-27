@@ -95,6 +95,39 @@ public sealed class SpecializationService : ISpecializationService
         return _mapper.Map<SpecializationDto>(specialization);
     }
 
+    public async Task<PagedResult<SpecializationDto>> GetSpecializationsPagedAsync(
+        SearchPagedSpecializationDto searchPagedSpecializationDto, 
+        CancellationToken ct = default)
+    {
+        var searchTerm = searchPagedSpecializationDto?.SearchTerm?.Trim().ToLower();
+        var pageNumber = searchPagedSpecializationDto?.PageNumber ?? 1;
+        var pageSize = searchPagedSpecializationDto?.PageSize ?? 10;
+
+        _logger.LogInformation(
+            "Fetching paged specializations. PageNumber: {PageNumber}, PageSize: {PageSize}, SearchTerm: {SearchTerm}", 
+            pageNumber, pageSize, searchTerm);
+
+        var (specializations, totalCount) = await _unitOfWork.Specializations.GetPagedAsync(
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            filter: s => string.IsNullOrWhiteSpace(searchTerm) || 
+                         s.Name.ToLower().Contains(searchTerm),
+            cancellationToken: ct
+        );
+
+        _logger.LogInformation(
+            "Retrieved page {PageNumber} of specializations ({ItemCount} item(s) on this page, {TotalCount} total matching)", 
+            pageNumber, specializations.Count(), totalCount);
+
+        var dtos = _mapper.Map<IEnumerable<SpecializationDto>>(specializations);
+
+        return new PagedResult<SpecializationDto>(
+            items: dtos, 
+            totalCount: totalCount, 
+            pageNumber: pageNumber, 
+            pageSize: pageSize);
+    }
+
     public async Task DeleteSpecializationAsync(Guid id, CancellationToken ct = default)
     {
         await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);

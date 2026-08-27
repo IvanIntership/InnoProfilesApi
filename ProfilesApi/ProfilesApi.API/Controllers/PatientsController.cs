@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProfilesApi.Application.Dto.Patients;
+using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -111,5 +112,21 @@ public sealed class PatientsController : ControllerBase
     {
         var patients = await _patientService.GetPatientsAsync(filteredPatientListDto, ct);
         return Ok(patients);
+    }
+    
+    [HttpPost("search/paged")]
+    [SwaggerOperation(
+        Summary = "Gets a paged list of patients",
+        Description = "Retrieves a paginated and filtered list of patients based on search parameters.",
+        OperationId = "GetPatientsPaged"
+    )]
+    [SwaggerResponse(StatusCodes.Status200OK, "Paged list of patients retrieved successfully", typeof(PagedResult<PatientDto>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid search or filter parameters")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
+    public async Task<IActionResult> GetPatientsPaged(
+        [FromBody] SearchPagedPatientDto searchPagedPatientDto, CancellationToken ct = default)
+    {
+        var pagedPatients = await _patientService.GetPatientsPagedAsync(searchPagedPatientDto, ct);
+        return Ok(pagedPatients);
     }
 }

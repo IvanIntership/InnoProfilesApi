@@ -97,4 +97,20 @@ public sealed class OfficesController : ControllerBase
         var offices = await _officeService.GetOfficeListAsync(filteredOfficeListDto, ct);
         return Ok(offices);
     }
+    
+    [HttpPost("search/paged")]
+    [SwaggerOperation(
+        Summary = "Gets a paged list of offices",
+        Description = "Retrieves a paginated and filtered list of offices based on search parameters.",
+        OperationId = "GetOfficesPaged"
+    )]
+    [SwaggerResponse(StatusCodes.Status200OK, "Paged list of offices retrieved successfully", typeof(PagedResult<OfficeDto>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid search or filter parameters")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
+    public async Task<IActionResult> GetOfficesPaged(
+        [FromBody] SearchPagedOfficeDto pagedOfficeDto, CancellationToken ct = default)
+    {
+        var pagedOffices = await _officeService.GetOfficeListPagedAsync(pagedOfficeDto, ct);
+        return Ok(pagedOffices);
+    }
 }
