@@ -3,9 +3,9 @@ using ProfilesApi.Application.Dto.Specializations;
 
 namespace ProfilesApi.Application.Validation.Specializations;
 
-public sealed class SearchQueryDtoValidator : AbstractValidator<SpecializationDto>
+public sealed class SpecializationDtoValidator : AbstractValidator<SpecializationDto>
 {
-    public SearchQueryDtoValidator()
+    public SpecializationDtoValidator()
     {
         RuleFor(x => x.Id).NotEmpty();
         

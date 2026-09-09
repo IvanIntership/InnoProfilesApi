@@ -68,6 +68,40 @@ public sealed class OfficeService : IOfficeService
         return _mapper.Map<IEnumerable<OfficeDto>>(filteredOffices);
     }
 
+    public async Task<PagedResult<OfficeDto>> GetOfficeListPagedAsync(
+        SearchPagedOfficeDto pagedOfficeDto, 
+        CancellationToken ct = default)
+    {
+        var searchQuery = pagedOfficeDto?.SearchTerm?.Trim().ToLower();
+        var pageNumber = pagedOfficeDto?.PageNumber ?? 1;
+        var pageSize = pagedOfficeDto?.PageSize ?? 10;
+
+        _logger.LogInformation(
+            "Fetching paged offices. PageNumber: {PageNumber}, PageSize: {PageSize}, SearchTerm: {SearchTerm}", 
+            pageNumber, pageSize, searchQuery);
+
+        var (offices, totalCount) = await _unitOfWork.Offices.GetPagedAsync(
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            filter: o => string.IsNullOrEmpty(searchQuery) 
+                         || o.Address.ToLower().Contains(searchQuery) 
+                         || o.PhoneNumber.Contains(searchQuery),
+            cancellationToken: ct
+        );
+
+        _logger.LogInformation(
+            "Retrieved page {PageNumber} of offices ({ItemCount} item(s) on this page, {TotalCount} total matching)", 
+            pageNumber, offices.Count(), totalCount);
+
+        var dtos = _mapper.Map<IEnumerable<OfficeDto>>(offices);
+
+        return new PagedResult<OfficeDto>(
+            items: dtos, 
+            totalCount: totalCount, 
+            pageNumber: pageNumber, 
+            pageSize: pageSize);
+    }
+
     public async Task<OfficeDto> GetOfficeByIdAsync(Guid id, CancellationToken ct = default)
     {
         _logger.LogInformation("Trying to get office with ID: {OfficeId}", id);

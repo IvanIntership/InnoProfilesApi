@@ -96,4 +96,20 @@ public sealed class SpecializationsController : ControllerBase
         var specializations = await _specializationService.GetSpecializationsAsync(filteredSpecializationListDto, ct);
         return Ok(specializations);
     }
+    
+    [HttpPost("search/paged")]
+    [SwaggerOperation(
+        Summary = "Gets a paged list of specializations",
+        Description = "Retrieves a paginated and filtered list of specializations based on search parameters.",
+        OperationId = "GetSpecializationsPaged"
+    )]
+    [SwaggerResponse(StatusCodes.Status200OK, "Paged list of specializations retrieved successfully", typeof(PagedResult<SpecializationDto>))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid search or filter parameters")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
+    public async Task<IActionResult> GetSpecializationsPaged(
+        [FromBody] SearchPagedSpecializationDto searchPagedSpecializationDto, CancellationToken ct = default)
+    {
+        var pagedSpecializations = await _specializationService.GetSpecializationsPagedAsync(searchPagedSpecializationDto, ct);
+        return Ok(pagedSpecializations);
+    }
 }

@@ -2,6 +2,7 @@ using System.Data;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using ProfilesApi.Application.Dto.Doctors;
+using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
 using ProfilesApi.Domain.Exceptions;
@@ -236,6 +237,59 @@ public sealed class DoctorService : IDoctorService
         _logger.LogInformation("Retrieved {Count} doctor(s) matching filter", doctors.Count);
         return _mapper.Map<IEnumerable<DoctorDto>>(doctors);
     }
+
+    public async Task<PagedResult<DoctorDto>> GetDoctorsPagedAsync(
+    SearchPagedDoctorDto searchPagedDoctorDto, 
+    CancellationToken ct = default)
+{
+    var searchTerm = searchPagedDoctorDto?.SearchTerm?.Trim().ToLower();
+    var officeId = searchPagedDoctorDto?.OfficeId;
+    var specializationId = searchPagedDoctorDto?.SpecializationId;
+    var minExperienceInYears = searchPagedDoctorDto?.MinExperienceYears;
+    var pageNumber = searchPagedDoctorDto?.PageNumber ?? 1;
+    var pageSize = searchPagedDoctorDto?.PageSize ?? 10;
+
+    DateTime? maxCareerStartDate = minExperienceInYears.HasValue 
+        ? DateTime.UtcNow.AddYears(-minExperienceInYears.Value) 
+        : null;
+
+    _logger.LogInformation(
+        "Fetching paged doctors. PageNumber: {PageNumber}, PageSize: {PageSize}, SearchTerm: {SearchTerm}, OfficeId: {OfficeId}, SpecializationId: {SpecializationId}", 
+        pageNumber, pageSize, searchTerm, officeId, specializationId);
+
+    var (doctors, totalCount) = await _unitOfWork.Doctors.GetPagedAsync(
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+        filter: d => 
+            (!maxCareerStartDate.HasValue || d.CareerStartDate.AddMonths(d.GapInMonths) <= maxCareerStartDate.Value) &&
+            (!specializationId.HasValue || d.SpecializationId == specializationId.Value) &&
+            (!officeId.HasValue || d.OfficeId == officeId.Value) &&
+            (string.IsNullOrWhiteSpace(searchTerm) ||
+             d.Account.Firstname.ToLower().Contains(searchTerm) ||
+             d.Account.Lastname.ToLower().Contains(searchTerm) ||
+             (d.Account.Firstname + " " + d.Account.Lastname).ToLower().Contains(searchTerm) ||
+             (d.Account.Lastname + " " + d.Account.Firstname).ToLower().Contains(searchTerm)),
+        cancellationToken: ct,
+        includesProperties:
+        [
+            d => d.Account,
+            d => d.Office,
+            d => d.Specialization
+        ]
+    );
+
+    _logger.LogInformation(
+        "Retrieved page {PageNumber} of doctors ({ItemCount} item(s) on this page, {TotalCount} total matching)", 
+        pageNumber, doctors.Count(), totalCount);
+
+    var dtos = _mapper.Map<IEnumerable<DoctorDto>>(doctors);
+
+    return new PagedResult<DoctorDto>(
+        items: dtos, 
+        totalCount: totalCount, 
+        pageNumber: pageNumber, 
+        pageSize: pageSize);
+}
 
     public async Task<DoctorDto> GetByAccountIdAsync(Guid accountId, CancellationToken ct = default)
     {

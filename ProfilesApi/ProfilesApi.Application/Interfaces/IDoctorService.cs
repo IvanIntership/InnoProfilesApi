@@ -1,4 +1,5 @@
 ﻿using ProfilesApi.Application.Dto.Doctors;
+using ProfilesApi.Application.Dto.Shared;
 
 namespace ProfilesApi.Application.Interfaces;
 
@@ -12,5 +13,6 @@ public interface IDoctorService
     
     Task<DoctorDto> GetDoctorAsync(Guid id, CancellationToken ct = default);
     Task<IEnumerable<DoctorDto>> GetDoctorsAsync(SearchFilteredDoctorListDto filteredDoctorListDto, CancellationToken ct = default);
+    Task<PagedResult<DoctorDto>> GetDoctorsPagedAsync(SearchPagedDoctorDto searchPagedDoctorDto, CancellationToken ct = default);
     Task<DoctorDto> GetByAccountIdAsync(Guid accountId, CancellationToken ct = default);
 }

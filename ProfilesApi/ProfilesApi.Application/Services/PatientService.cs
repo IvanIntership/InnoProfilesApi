@@ -2,6 +2,7 @@ using System.Data;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using ProfilesApi.Application.Dto.Patients;
+using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Domain.Entities;
 using ProfilesApi.Domain.Exceptions;
@@ -122,6 +123,46 @@ public sealed class PatientService : IPatientService
     
         _logger.LogInformation("Retrieved {Count} patient(s) matching filter", patients.Count);
         return _mapper.Map<IEnumerable<PatientDto>>(patients);
+    }
+
+    public async Task<PagedResult<PatientDto>> GetPatientsPagedAsync(
+        SearchPagedPatientDto searchPagedPatientDto, 
+        CancellationToken ct = default)
+    {
+        var searchTerm = searchPagedPatientDto?.SearchTerm?.Trim().ToLower();
+        var pageNumber = searchPagedPatientDto?.PageNumber ?? 1;
+        var pageSize = searchPagedPatientDto?.PageSize ?? 10;
+
+        _logger.LogInformation(
+            "Fetching paged patients. PageNumber: {PageNumber}, PageSize: {PageSize}, SearchTerm: {SearchTerm}", 
+            pageNumber, pageSize, searchTerm);
+
+        var (patients, totalCount) = await _unitOfWork.Patients.GetPagedAsync(
+            pageNumber: pageNumber,
+            pageSize: pageSize,
+            filter: p => string.IsNullOrWhiteSpace(searchTerm) ||
+                         p.Account.Firstname.ToLower().Contains(searchTerm) ||
+                         p.Account.Lastname.ToLower().Contains(searchTerm) ||
+                         (p.Account.Firstname + " " + p.Account.Lastname).ToLower().Contains(searchTerm) ||
+                         (p.Account.Lastname + " " + p.Account.Firstname).ToLower().Contains(searchTerm),
+            cancellationToken: ct,
+            includesProperties:
+            [
+                p => p.Account
+            ]
+        );
+
+        _logger.LogInformation(
+            "Retrieved page {PageNumber} of patients ({ItemCount} item(s) on this page, {TotalCount} total matching)", 
+            pageNumber, patients.Count(), totalCount);
+
+        var dtos = _mapper.Map<IEnumerable<PatientDto>>(patients);
+
+        return new PagedResult<PatientDto>(
+            items: dtos, 
+            totalCount: totalCount, 
+            pageNumber: pageNumber, 
+            pageSize: pageSize);
     }
 
     public async Task<PatientDto> EditPatientAsync(EditPatientProfileDto editPatientProfileDto, Guid? editdById = null, CancellationToken ct = default)
