@@ -1,8 +1,10 @@
 using ProfilesApi.Application;
 using ProfilesApi.Infrastructure;
 using FluentValidation.AspNetCore;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using ProfilesApi.API.Middleware;
+using ProfilesApi.Application.Consumers;
 using Serilog;
 using Serilog.Events;
 
@@ -38,6 +40,32 @@ try
     builder.Services.AddSwaggerGen();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
+    
+    builder.Services.AddMassTransit(x =>
+    {
+        x.AddConsumer<PatientRegisteredConsumer>();
+        x.UsingRabbitMq((context, cfg) =>
+        {
+            var rabbitSettings = builder.Configuration.GetSection("RabbitMQ");
+
+            cfg.Host(
+                rabbitSettings["Host"] ?? "localhost", 
+                rabbitSettings["VirtualHost"] ?? "/", 
+                h =>
+                {
+                    h.Username(rabbitSettings["Username"] ?? "guest");
+                    h.Password(rabbitSettings["Password"] ?? "guest");
+                }
+            );
+            
+            cfg.ReceiveEndpoint("patient-registered-queue", e =>
+            {
+                e.ConfigureConsumer<PatientRegisteredConsumer>(context);
+            });
+            
+            cfg.ConfigureEndpoints(context);
+        });
+    });
 
     var app = builder.Build();
 

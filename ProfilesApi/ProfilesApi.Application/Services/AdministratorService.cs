@@ -1,5 +1,7 @@
 using System.Data;
 using AutoMapper;
+using InnoClinic.Shared.Events;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using ProfilesApi.Application.Dto.Administrators;
 using ProfilesApi.Application.Dto.Shared;
@@ -15,17 +17,19 @@ public sealed class AdministratorService : IAdministratorService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ILogger<AdministratorService> _logger;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public AdministratorService(
         IMapper mapper, 
         IUnitOfWork unitOfWork, 
         IPasswordHasher passwordHasher,
-        ILogger<AdministratorService> logger)
+        ILogger<AdministratorService> logger, IPublishEndpoint publishEndpoint)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<AdministratorDto> CreateAdministratorAsync(CreateAdministratorDto createAdministratorDto, Guid createdById,
@@ -73,6 +77,16 @@ public sealed class AdministratorService : IAdministratorService
         
             _unitOfWork.Accounts.Add(account);
             _unitOfWork.Administrators.Add(administrator);
+            
+            await _publishEndpoint.Publish<IStaffCreatedEvent>(new
+            {
+                AccountId = account.Id,
+                Email = createAdministratorDto.Email,
+                Password = createAdministratorDto.Password,
+                Firstname = createAdministratorDto.Firstname,
+                Lastname = createAdministratorDto.Lastname,
+                Role = InnoClinic.Shared.Events.Roles.Administrator
+            }, ct);
             
             await _unitOfWork.CompleteAsync(ct);
             await _unitOfWork.CommitTransactionAsync(ct);
