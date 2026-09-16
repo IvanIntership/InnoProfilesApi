@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProfilesApi.API.Constants;
 using ProfilesApi.Application.Dto.Offices;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
@@ -10,6 +11,7 @@ namespace ProfilesApi.API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
+[Authorize]
 public sealed class OfficesController : ControllerBase
 {
     private readonly IOfficeService _officeService;
@@ -20,7 +22,7 @@ public sealed class OfficesController : ControllerBase
     }
     
     [HttpPost]
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Policy = AuthPolicies.RequireAdmin)]
     [SwaggerOperation(
         Summary = "Adds a new office",
         Description = "Registers a new office with the specified details.",
@@ -37,7 +39,7 @@ public sealed class OfficesController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Policy = AuthPolicies.RequireAdmin)]
     [SwaggerOperation(
         Summary = "Deletes an office",
         Description = "Permanently removes an office by its unique identifier.",
@@ -54,7 +56,7 @@ public sealed class OfficesController : ControllerBase
     }
     
     [HttpPut]
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Policy = AuthPolicies.RequireAdmin)]
     [SwaggerOperation(
         Summary = "Edits office information",
         Description = "Edits specified office details.",
@@ -72,6 +74,7 @@ public sealed class OfficesController : ControllerBase
     }
 
     [HttpGet("{officeId:guid}")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets an office by ID",
         Description = "Retrieves detailed information for a specific office using its unique identifier.",
@@ -87,6 +90,7 @@ public sealed class OfficesController : ControllerBase
     }
 
     [HttpPost("search")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets a list of offices",
         Description = "Retrieves a paginated and filtered list of offices based on search parameters.",
@@ -103,6 +107,7 @@ public sealed class OfficesController : ControllerBase
     }
     
     [HttpPost("search/paged")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets a paged list of offices",
         Description = "Retrieves a paginated and filtered list of offices based on search parameters.",

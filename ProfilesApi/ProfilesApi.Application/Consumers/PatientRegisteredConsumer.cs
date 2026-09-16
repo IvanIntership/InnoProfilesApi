@@ -1,5 +1,6 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using InnoClinic.Shared.Events;
 using ProfilesApi.Application.Dto.Patients;
 using ProfilesApi.Application.Interfaces;
@@ -9,13 +10,16 @@ namespace ProfilesApi.Application.Consumers;
 public sealed class PatientRegisteredConsumer : IConsumer<IPatientRegisteredEvent>
 {
     private readonly IPatientService _patientService;
+    private readonly IRegistrationPublisher _publisher;
     private readonly ILogger<PatientRegisteredConsumer> _logger;
 
     public PatientRegisteredConsumer(
         IPatientService patientService,
+        [FromKeyedServices("ConsumerContext")] IRegistrationPublisher publisher,
         ILogger<PatientRegisteredConsumer> logger)
     {
         _patientService = patientService;
+        _publisher = publisher;
         _logger = logger;
     }
 
@@ -34,6 +38,10 @@ public sealed class PatientRegisteredConsumer : IConsumer<IPatientRegisteredEven
             Birthday = message.Birthday
         };
 
-        await _patientService.CreatePatientFromEventAsync(message.AccountId, registerDto, context.CancellationToken);
+        await _patientService.CreatePatientAsync(
+            registerDto, 
+            _publisher, 
+            customAccountId: message.AccountId, 
+            ct: context.CancellationToken);
     }
 }

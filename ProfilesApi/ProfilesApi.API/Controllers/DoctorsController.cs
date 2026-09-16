@@ -1,16 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProfilesApi.API.Constants;
 using ProfilesApi.Application.Dto.Doctors;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 
 namespace ProfilesApi.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
+[Authorize]
 public sealed class DoctorsController : ControllerBase
 {
     private readonly IDoctorService _doctorService;
@@ -21,7 +23,7 @@ public sealed class DoctorsController : ControllerBase
     }
     
     [HttpPost]
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Policy = AuthPolicies.RequireAdmin)]
     [SwaggerOperation(
         Summary = "Adds a new doctor",
         Description = "Registers a new system doctor with the specified details",
@@ -40,7 +42,7 @@ public sealed class DoctorsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Policy = AuthPolicies.RequireAdmin)]
     [SwaggerOperation(
         Summary = "Deletes an doctor",
         Description = "Permanently removes a system doctor account by its unique identifier.",
@@ -56,7 +58,7 @@ public sealed class DoctorsController : ControllerBase
     }
     
     [HttpPut]
-    [Authorize(Roles = "Administrator,Doctor")]
+    [Authorize(Policy = AuthPolicies.RequireStaff)]
     [SwaggerOperation(
         Summary = "Edits an doctor profile",
         Description = "Edits system doctor specified details",
@@ -75,6 +77,7 @@ public sealed class DoctorsController : ControllerBase
     }
 
     [HttpGet("{doctorId:guid}")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets an doctor by ID",
         Description = "Retrieves detailed information for a specific doctor using their unique identifier.",
@@ -90,6 +93,7 @@ public sealed class DoctorsController : ControllerBase
     }
     
     [HttpGet("accounts/{accountId:guid}")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets an doctor by account ID",
         Description = "Retrieves doctor details associated with a specific user account ID.",
@@ -105,6 +109,7 @@ public sealed class DoctorsController : ControllerBase
     }
 
     [HttpPost("search")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets a list of doctors",
         Description = "Retrieves a paginated and filtered list of doctors based on search parameters.",
@@ -121,6 +126,7 @@ public sealed class DoctorsController : ControllerBase
     }
     
     [HttpPost("search/paged")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets a paged list of doctors",
         Description = "Retrieves a paginated and filtered list of doctors based on search parameters.",

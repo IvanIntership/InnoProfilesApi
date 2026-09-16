@@ -27,13 +27,28 @@ public sealed class PatientService : IPatientService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<PatientDto> CreatePatientAsync(RegisterPatientDto registerPatientDto, Guid? createdById = null, CancellationToken ct = default)
+    public async Task<PatientDto> CreatePatientAsync(
+        RegisterPatientDto registerPatientDto, 
+        IRegistrationPublisher publisher, 
+        Guid? customAccountId = null, 
+        Guid? createdById = null, 
+        CancellationToken ct = default)
     {
         await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         try
         {
             _logger.LogInformation("Creating new patient account for Email: {Email}.", registerPatientDto.Email);
             
+            if (customAccountId.HasValue)
+            {
+                var accountExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Id == customAccountId.Value, ct);
+                if (accountExists)
+                {
+                    _logger.LogWarning("Patient account with ID {AccountId} already exists. Skipping creation.", customAccountId.Value);
+                    return await GetByAccountIdAsync(customAccountId.Value, ct);
+                }
+            }
+
             var emailExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Email == registerPatientDto.Email, ct);
             var numberExists = await _unitOfWork.Accounts.ExistsAsync(a => a.PhoneNumber == registerPatientDto.PhoneNumber, ct);
 
@@ -52,82 +67,26 @@ public sealed class PatientService : IPatientService
             var patient = _mapper.Map<Patient>(registerPatientDto);
             var account = _mapper.Map<Account>(registerPatientDto);
 
-            if (!createdById.HasValue || createdById == Guid.Empty)
-            {
-                createdById = account.Id;
-            }
+            var accountId = customAccountId ?? account.Id;
 
-            account.CreatedBy = createdById.Value;
-            account.UpdatedBy = createdById.Value;
+            account.Id = accountId;
+            account.CreatedBy = createdById ?? accountId;
+            account.UpdatedBy = createdById ?? accountId;
             account.PasswordHash = _passwordHasher.HashPassword(registerPatientDto.Password);
+            account.Role = Domain.Enums.Roles.Patient;
 
-            patient.AccountId = account.Id;
+            patient.AccountId = accountId;
             patient.Account = account;
 
             _unitOfWork.Accounts.Add(account);
             _unitOfWork.Patients.Add(patient);
+            
+            await publisher.PublishCreatedAsync(account, registerPatientDto.Password, InnoClinic.Shared.Events.Roles.Patient, ct);
             
             await _unitOfWork.CompleteAsync(ct);
             await _unitOfWork.CommitTransactionAsync(ct);
 
             _logger.LogInformation("Successfully created patient with ID: {PatientId}.", patient.Id);
-            return _mapper.Map<PatientDto>(patient);
-        }
-        catch
-        {
-            await _unitOfWork.RollbackTransactionAsync(ct);
-            throw;
-        }
-    }
-    
-    public async Task<PatientDto> CreatePatientFromEventAsync(Guid accountId, RegisterPatientDto registerPatientDto, CancellationToken ct = default)
-    {
-        await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        try
-        {
-            _logger.LogInformation("Creating patient profile from event for AccountId: {AccountId}, Email: {Email}.", accountId, registerPatientDto.Email);
-            
-            var accountExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Id == accountId, ct);
-            if (accountExists)
-            {
-                _logger.LogWarning("Patient account with ID {AccountId} already exists. Skipping creation.", accountId);
-                return await GetByAccountIdAsync(accountId, ct);
-            }
-    
-            var emailExists = await _unitOfWork.Accounts.ExistsAsync(a => a.Email == registerPatientDto.Email, ct);
-            var numberExists = await _unitOfWork.Accounts.ExistsAsync(a => a.PhoneNumber == registerPatientDto.PhoneNumber, ct);
-    
-            if (emailExists)
-            {
-                _logger.LogWarning("Patient creation failed from event. Email {Email} is already in use.", registerPatientDto.Email);
-                throw new ConflictException("Email is already in use by another account.");
-            }
-    
-            if (numberExists)
-            {
-                _logger.LogWarning("Patient creation failed from event. Phone number {PhoneNumber} is already in use.", registerPatientDto.PhoneNumber);
-                throw new ConflictException("Phone number is already in use by another account.");
-            }
-    
-            var patient = _mapper.Map<Patient>(registerPatientDto);
-            var account = _mapper.Map<Account>(registerPatientDto);
-    
-            account.Id = accountId;
-            account.CreatedBy = accountId;
-            account.UpdatedBy = accountId;
-            account.PasswordHash = _passwordHasher.HashPassword(registerPatientDto.Password);
-            account.Role = Domain.Enums.Roles.Patient;
-    
-            patient.AccountId = accountId;
-            patient.Account = account;
-    
-            _unitOfWork.Accounts.Add(account);
-            _unitOfWork.Patients.Add(patient);
-            
-            await _unitOfWork.CompleteAsync(ct);
-            await _unitOfWork.CommitTransactionAsync(ct);
-    
-            _logger.LogInformation("Successfully created patient profile from event with ID: {PatientId} and AccountId: {AccountId}.", patient.Id, accountId);
             return _mapper.Map<PatientDto>(patient);
         }
         catch

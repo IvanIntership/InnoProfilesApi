@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using ProfilesApi.API.Constants;
 using ProfilesApi.API.Middleware;
 using ProfilesApi.Application.Consumers;
 using Serilog;
@@ -155,7 +156,20 @@ try
         };
     });
     
-    builder.Services.AddAuthorization();
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy(AuthPolicies.RequireAdmin, policy => 
+            policy.RequireRole("Administrator"));
+        
+        options.AddPolicy(AuthPolicies.RequireStaff, policy => 
+            policy.RequireRole("Administrator", "Doctor"));
+        
+        options.AddPolicy(AuthPolicies.RequirePatientOrAdmin, policy => 
+            policy.RequireRole("Administrator", "Patient"));
+        
+        options.AddPolicy(AuthPolicies.RequireAllRoles, policy => 
+            policy.RequireRole("Administrator", "Doctor", "Patient"));
+    });
 
     var app = builder.Build();
 

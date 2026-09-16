@@ -1,17 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProfilesApi.API.Constants;
 using ProfilesApi.Application.Dto.Administrators;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 
 namespace ProfilesApi.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
-[Authorize(Roles = "Administrator")]
+[Authorize(Policy = AuthPolicies.RequireAdmin)]
 public sealed class AdministratorsController : ControllerBase
 {
     private readonly IAdministratorService _administratorService;
