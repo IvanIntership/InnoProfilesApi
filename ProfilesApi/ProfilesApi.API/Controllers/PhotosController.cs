@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProfilesApi.Application.Dto.Photos;
 using ProfilesApi.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
@@ -7,6 +8,7 @@ namespace ProfilesApi.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(Roles = "Administrator,Doctor,Patient")]
 public sealed class PhotosController : ControllerBase
 {
     private readonly IPhotoService _photoService;
@@ -33,6 +35,7 @@ public sealed class PhotosController : ControllerBase
     }
 
     [HttpGet("{photoId:guid}")]
+    [AllowAnonymous]
     [Consumes("application/json")]
     [SwaggerOperation(
         Summary = "Gets a photo by ID",

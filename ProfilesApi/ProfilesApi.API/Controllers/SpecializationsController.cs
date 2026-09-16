@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Dto.Specializations;
 using ProfilesApi.Application.Interfaces;
@@ -19,6 +20,7 @@ public sealed class SpecializationsController : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [SwaggerOperation(
         Summary = "Adds a new specialization",
         Description = "Registers a new specialization with the specified details.",
@@ -35,6 +37,7 @@ public sealed class SpecializationsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Administrator")]
     [SwaggerOperation(
         Summary = "Deletes a specialization",
         Description = "Permanently removes a specialization by its unique identifier.",
@@ -51,6 +54,7 @@ public sealed class SpecializationsController : ControllerBase
     }
     
     [HttpPut]
+    [Authorize(Roles = "Administrator")]
     [SwaggerOperation(
         Summary = "Edits specialization information",
         Description = "Edits specified specialization details.",

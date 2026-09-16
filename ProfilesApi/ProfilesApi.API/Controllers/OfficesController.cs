@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProfilesApi.Application.Dto.Offices;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
@@ -19,6 +20,7 @@ public sealed class OfficesController : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [SwaggerOperation(
         Summary = "Adds a new office",
         Description = "Registers a new office with the specified details.",
@@ -35,6 +37,7 @@ public sealed class OfficesController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Administrator")]
     [SwaggerOperation(
         Summary = "Deletes an office",
         Description = "Permanently removes an office by its unique identifier.",
@@ -51,6 +54,7 @@ public sealed class OfficesController : ControllerBase
     }
     
     [HttpPut]
+    [Authorize(Roles = "Administrator")]
     [SwaggerOperation(
         Summary = "Edits office information",
         Description = "Edits specified office details.",

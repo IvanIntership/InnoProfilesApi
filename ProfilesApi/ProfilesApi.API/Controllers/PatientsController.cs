@@ -3,6 +3,8 @@ using ProfilesApi.Application.Dto.Patients;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ProfilesApi.API.Controllers;
 
@@ -19,23 +21,25 @@ public sealed class PatientsController : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [SwaggerOperation(
         Summary = "Adds a new patient",
-        Description = "Registers a new patient with the specified details. Requires the acting user's ID in the request header",
+        Description = "Registers a new patient with the specified details",
         OperationId = "CreatePatient"
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Patient was created successfully", typeof(PatientDto))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request body or parameters")]
     [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> CreatePatient([FromBody] RegisterPatientDto registerPatientDto,
-        [FromHeader(Name = "X-User-Id")] Guid createdById, CancellationToken ct = default)
+    public async Task<IActionResult> CreatePatient([FromBody] RegisterPatientDto registerPatientDto, CancellationToken ct = default)
     {
+        var createdById = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var result = await _patientService.CreatePatientAsync(registerPatientDto, createdById, ct);
         return Created($"/patients/{result.Id}", result);
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Administrator")]
     [SwaggerOperation(
         Summary = "Deletes a patient",
         Description = "Permanently removes a patient account by its unique identifier.",
@@ -51,9 +55,10 @@ public sealed class PatientsController : ControllerBase
     }
     
     [HttpPut]
+    [Authorize(Roles = "Administrator,Patient")]
     [SwaggerOperation(
         Summary = "Edits a patient profile",
-        Description = "Edits patient specified details. Requires the acting user's ID in the request header",
+        Description = "Edits patient specified details",
         OperationId = "EditPatient"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Patient profile was successfully edited", typeof(PatientDto))]
@@ -61,14 +66,15 @@ public sealed class PatientsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Patient with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> EditPatientProfile([FromBody] EditPatientProfileDto editPatientProfileDto,
-        [FromHeader(Name = "X-User-Id")] Guid editedById, CancellationToken ct = default)
+    public async Task<IActionResult> EditPatientProfile([FromBody] EditPatientProfileDto editPatientProfileDto, CancellationToken ct = default)
     {
+        var editedById = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var editedPatient = await _patientService.EditPatientAsync(editPatientProfileDto, editedById, ct);
         return Ok(editedPatient);
     }
 
     [HttpGet("{patientId:guid}")]
+    [Authorize(Roles = "Administrator,Doctor,Patient")]
     [SwaggerOperation(
         Summary = "Gets a patient by ID",
         Description = "Retrieves detailed information for a specific patient using their unique identifier.",
@@ -84,6 +90,7 @@ public sealed class PatientsController : ControllerBase
     }
     
     [HttpGet("accounts/{accountId:guid}")]
+    [Authorize(Roles = "Administrator,Doctor,Patient")]
     [SwaggerOperation(
         Summary = "Gets a patient by account ID",
         Description = "Retrieves patient details associated with a specific user account ID.",
@@ -99,6 +106,7 @@ public sealed class PatientsController : ControllerBase
     }
 
     [HttpPost("search")]
+    [Authorize(Roles = "Administrator,Doctor")]
     [SwaggerOperation(
         Summary = "Gets a list of patients",
         Description = "Retrieves a paginated and filtered list of patients based on search parameters.",
@@ -115,6 +123,7 @@ public sealed class PatientsController : ControllerBase
     }
     
     [HttpPost("search/paged")]
+    [Authorize(Roles = "Administrator,Doctor")]
     [SwaggerOperation(
         Summary = "Gets a paged list of patients",
         Description = "Retrieves a paginated and filtered list of patients based on search parameters.",

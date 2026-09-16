@@ -3,6 +3,8 @@ using ProfilesApi.Application.Dto.Doctors;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ProfilesApi.API.Controllers;
 
@@ -19,9 +21,10 @@ public sealed class DoctorsController : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Roles = "Administrator")]
     [SwaggerOperation(
         Summary = "Adds a new doctor",
-        Description = "Registers a new system doctor with the specified details. Requires the acting user's ID in the request header",
+        Description = "Registers a new system doctor with the specified details",
         OperationId = "AddDoctor"
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Doctor was created successfully", typeof(DoctorDto))]
@@ -29,14 +32,15 @@ public sealed class DoctorsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Office or specialization with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> CreateDoctor([FromBody] CreateDoctorDto createDoctorDto,
-        [FromHeader(Name = "X-User-Id")] Guid createdById, CancellationToken ct = default)
+    public async Task<IActionResult> CreateDoctor([FromBody] CreateDoctorDto createDoctorDto, CancellationToken ct = default)
     {
+        var createdById = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var result = await _doctorService.CreateDoctorAsync(createDoctorDto, createdById, ct);
         return Created($"/doctors/{result.Id}", result);
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Administrator")]
     [SwaggerOperation(
         Summary = "Deletes an doctor",
         Description = "Permanently removes a system doctor account by its unique identifier.",
@@ -52,9 +56,10 @@ public sealed class DoctorsController : ControllerBase
     }
     
     [HttpPut]
+    [Authorize(Roles = "Administrator,Doctor")]
     [SwaggerOperation(
         Summary = "Edits an doctor profile",
-        Description = "Edits system doctor specified details. Requires the acting user's ID in the request header",
+        Description = "Edits system doctor specified details",
         OperationId = "EditDoctor"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Doctor profile was successfully edited", typeof(DoctorDto))]
@@ -62,9 +67,9 @@ public sealed class DoctorsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Doctor, office, or specialization with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> EditDoctorProfile([FromBody] EditDoctorProfileDto editDoctorProfileDto,
-        [FromHeader(Name = "X-User-Id")] Guid editedById, CancellationToken ct = default)
+    public async Task<IActionResult> EditDoctorProfile([FromBody] EditDoctorProfileDto editDoctorProfileDto, CancellationToken ct = default)
     {
+        var editedById = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var editedDoctor = await _doctorService.EditDoctorProfileAsync(editDoctorProfileDto, editedById, ct);
         return Ok(editedDoctor);
     }
