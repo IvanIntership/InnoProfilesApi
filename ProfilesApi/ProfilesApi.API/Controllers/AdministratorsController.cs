@@ -1,14 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProfilesApi.API.Constants;
 using ProfilesApi.Application.Dto.Administrators;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 
 namespace ProfilesApi.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
+[Authorize(Policy = AuthPolicies.RequireAdmin)]
 public sealed class AdministratorsController : ControllerBase
 {
     private readonly IAdministratorService _administratorService;
@@ -21,7 +25,7 @@ public sealed class AdministratorsController : ControllerBase
     [HttpPost]
     [SwaggerOperation(
         Summary = "Adds a new administrator",
-        Description = "Registers a new system administrator with the specified details. Requires the acting user's ID in the request header",
+        Description = "Registers a new system administrator with the specified details",
         OperationId = "AddAdministrator"
     )]
     [SwaggerResponse(StatusCodes.Status201Created, "Administrator was created successfully", typeof(AdministratorDto))]
@@ -29,9 +33,9 @@ public sealed class AdministratorsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Office with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> CreateAdministrator([FromBody] CreateAdministratorDto createAdministratorDto,
-        [FromHeader(Name = "X-User-Id")] Guid createdById, CancellationToken ct = default)
+    public async Task<IActionResult> CreateAdministrator([FromBody] CreateAdministratorDto createAdministratorDto, CancellationToken ct = default)
     {
+        var createdById = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var result = await _administratorService.CreateAdministratorAsync(createAdministratorDto, createdById, ct);
         return Created($"/administrators/{result.Id}", result);
     }
@@ -55,7 +59,7 @@ public sealed class AdministratorsController : ControllerBase
     [HttpPut]
     [SwaggerOperation(
         Summary = "Edits an administrator profile",
-        Description = "Edits system administrators specified details. Requires the acting user's ID in the request header",
+        Description = "Edits system administrators specified details",
         OperationId = "EditAdministrator"
     )]
     [SwaggerResponse(StatusCodes.Status200OK, "Administrator profile was successfully edited", typeof(AdministratorDto))]
@@ -63,9 +67,9 @@ public sealed class AdministratorsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Administrator or office with specified ID was not found")]
     [SwaggerResponse(StatusCodes.Status409Conflict, "Email or phone number is already in use by another account")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "Internal service error")]
-    public async Task<IActionResult> EditAdministratorProfile([FromBody] EditAdministratorProfileDto editAdministratorProfileDto,
-        [FromHeader(Name = "X-User-Id")] Guid editedById, CancellationToken ct = default)
+    public async Task<IActionResult> EditAdministratorProfile([FromBody] EditAdministratorProfileDto editAdministratorProfileDto, CancellationToken ct = default)
     {
+        var editedById = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var editedAdministrator = await _administratorService.EditAdministratorProfileAsync(editAdministratorProfileDto, editedById, ct);
         return Ok(editedAdministrator);
     }

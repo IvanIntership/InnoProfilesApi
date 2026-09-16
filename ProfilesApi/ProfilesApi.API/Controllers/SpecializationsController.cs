@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProfilesApi.API.Constants;
 using ProfilesApi.Application.Dto.Shared;
 using ProfilesApi.Application.Dto.Specializations;
 using ProfilesApi.Application.Interfaces;
@@ -9,6 +11,7 @@ namespace ProfilesApi.API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
+[Authorize]
 public sealed class SpecializationsController : ControllerBase
 {
     private readonly ISpecializationService _specializationService;
@@ -19,6 +22,7 @@ public sealed class SpecializationsController : ControllerBase
     }
     
     [HttpPost]
+    [Authorize(Policy = AuthPolicies.RequireAdmin)]
     [SwaggerOperation(
         Summary = "Adds a new specialization",
         Description = "Registers a new specialization with the specified details.",
@@ -35,6 +39,7 @@ public sealed class SpecializationsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = AuthPolicies.RequireAdmin)]
     [SwaggerOperation(
         Summary = "Deletes a specialization",
         Description = "Permanently removes a specialization by its unique identifier.",
@@ -51,6 +56,7 @@ public sealed class SpecializationsController : ControllerBase
     }
     
     [HttpPut]
+    [Authorize(Policy = AuthPolicies.RequireAdmin)]
     [SwaggerOperation(
         Summary = "Edits specialization information",
         Description = "Edits specified specialization details.",
@@ -67,6 +73,7 @@ public sealed class SpecializationsController : ControllerBase
     }
 
     [HttpGet("{specializationId:guid}")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets a specialization by ID",
         Description = "Retrieves detailed information for a specific specialization using its unique identifier.",
@@ -82,6 +89,7 @@ public sealed class SpecializationsController : ControllerBase
     }
 
     [HttpPost("search")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets a list of specializations",
         Description = "Retrieves a paginated and filtered list of specializations based on search parameters.",
@@ -98,6 +106,7 @@ public sealed class SpecializationsController : ControllerBase
     }
     
     [HttpPost("search/paged")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets a paged list of specializations",
         Description = "Retrieves a paginated and filtered list of specializations based on search parameters.",

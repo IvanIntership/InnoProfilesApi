@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ProfilesApi.Application.Dto.Accounts;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Application.Mappings;
+using ProfilesApi.Application.Publishers;
 using ProfilesApi.Application.Services;
 
 namespace ProfilesApi.Application;
@@ -13,6 +14,9 @@ public static class DependencyInjection
     {
         services.AddValidatorsFromAssemblyContaining<AccountDto>();
         services.AddAutoMapper(cfg => cfg.AddMaps(typeof(AccountMappingProfile).Assembly));
+
+        services.AddKeyedScoped<IRegistrationPublisher, StaffCreatedPublisher>("ApiContext");
+        services.AddKeyedScoped<IRegistrationPublisher, NullRegistrationPublisher>("ConsumerContext");
         
         services.AddScoped<IAdministratorService, AdministratorService>();
         services.AddScoped<IDoctorService, DoctorService>();

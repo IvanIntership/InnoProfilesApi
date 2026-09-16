@@ -1,5 +1,7 @@
 using System.Data;
 using AutoMapper;
+using InnoClinic.Shared.Events;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using ProfilesApi.Application.Dto.Doctors;
 using ProfilesApi.Application.Dto.Shared;
@@ -15,16 +17,18 @@ public sealed class DoctorService : IDoctorService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ILogger<DoctorService> _logger;
+    private readonly IPublishEndpoint _publishEndpoint;
     
     public DoctorService(IMapper mapper,
         IUnitOfWork unitOfWork, 
         IPasswordHasher passwordHasher,
-        ILogger<DoctorService> logger)
+        ILogger<DoctorService> logger, IPublishEndpoint publishEndpoint)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<DoctorDto> CreateDoctorAsync(CreateDoctorDto createDoctorDto, Guid? createdById = null, CancellationToken ct = default)
@@ -80,6 +84,16 @@ public sealed class DoctorService : IDoctorService
         
             _unitOfWork.Accounts.Add(account);
             _unitOfWork.Doctors.Add(doctor);
+            
+            await _publishEndpoint.Publish<IStaffCreatedEvent>(new
+            {
+                AccountId = account.Id,
+                Email = createDoctorDto.Email,
+                Password = createDoctorDto.Password,
+                Firstname = createDoctorDto.Firstname,
+                Lastname = createDoctorDto.Lastname,
+                Role = InnoClinic.Shared.Events.Roles.Doctor
+            }, ct);
 
             await _unitOfWork.CompleteAsync(ct);
             await _unitOfWork.CommitTransactionAsync(ct);

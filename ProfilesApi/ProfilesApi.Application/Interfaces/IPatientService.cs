@@ -5,8 +5,8 @@ namespace ProfilesApi.Application.Interfaces;
 
 public interface IPatientService
 {
-    Task<PatientDto> CreatePatientAsync(RegisterPatientDto dto, Guid? createdById = null, CancellationToken ct = default);
-    
+    Task<PatientDto> CreatePatientAsync(RegisterPatientDto registerPatientDto, IRegistrationPublisher publisher,
+        Guid? customAccountId = null, Guid? createdById = null, CancellationToken ct = default);
     Task<PatientDto> GetPatientAsync(Guid id, CancellationToken ct = default);
     Task<IEnumerable<PatientDto>> GetPatientsAsync(SearchFilteredPatientListDto filteredPatientListDto, CancellationToken ct = default);
     Task<PagedResult<PatientDto>> GetPatientsPagedAsync(SearchPagedPatientDto searchPagedPatientDto, CancellationToken ct = default);

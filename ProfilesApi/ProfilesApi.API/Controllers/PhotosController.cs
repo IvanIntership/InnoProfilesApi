@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProfilesApi.API.Constants;
 using ProfilesApi.Application.Dto.Photos;
 using ProfilesApi.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
@@ -7,6 +9,7 @@ namespace ProfilesApi.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize]
 public sealed class PhotosController : ControllerBase
 {
     private readonly IPhotoService _photoService;
@@ -18,6 +21,7 @@ public sealed class PhotosController : ControllerBase
 
     [HttpDelete("{photoId:guid}")]
     [Consumes("application/json")]
+    [Authorize(Policy = AuthPolicies.RequireAllRoles)]
     [SwaggerOperation(
         Summary = "Deletes a photo",
         Description = "Permanently removes a photo by its unique identifier.",
@@ -34,6 +38,7 @@ public sealed class PhotosController : ControllerBase
 
     [HttpGet("{photoId:guid}")]
     [Consumes("application/json")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Gets a photo by ID",
         Description = "Retrieves detailed information for a specific photo using its unique identifier.",
@@ -50,6 +55,7 @@ public sealed class PhotosController : ControllerBase
     
     [HttpPost]
     [Consumes("multipart/form-data")]
+    [Authorize(Policy = AuthPolicies.RequireAllRoles)]
     [SwaggerOperation(
         Summary = "Uploads a photo",
         Description = "Uploads a new photo file to the system.",
