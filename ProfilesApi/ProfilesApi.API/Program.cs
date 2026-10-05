@@ -50,6 +50,7 @@ try
     builder.Services.AddMassTransit(x =>
     {
         x.AddConsumer<PatientRegisteredConsumer>();
+        x.AddConsumer<ProfileRegisteredConsumer>();
         x.UsingRabbitMq((context, cfg) =>
         {
             var rabbitSettings = builder.Configuration.GetSection("RabbitMQ");
