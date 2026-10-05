@@ -13,7 +13,7 @@ env:
 jobs:
   lint:
     name: Code Linter
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
@@ -25,7 +25,7 @@ jobs:
 
   build-and-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: lint
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
 
   publish-nuget:
     name: Publish NuGet
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-and-test
     permissions:
       id-token: write 
@@ -61,7 +61,7 @@ jobs:
 
   build-docker:
     name: Build Docker Image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-and-test
     steps:
       - uses: actions/checkout@v4
