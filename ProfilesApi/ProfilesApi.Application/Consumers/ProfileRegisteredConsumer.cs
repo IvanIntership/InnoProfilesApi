@@ -1,7 +1,7 @@
-﻿using MassTransit;
-using ProfilesApi.Domain.Entities;
+﻿using InnoClinic.Shared.Events;
+using MassTransit;
 using ProfilesApi.Application.Interfaces;
-using InnoClinic.Shared.Events;
+using ProfilesApi.Domain.Entities;
 
 namespace ProfilesApi.Application.Consumers;
 
@@ -17,7 +17,7 @@ public class ProfileRegisteredConsumer : IConsumer<IProfileRegisteredEvent>
     public async Task Consume(ConsumeContext<IProfileRegisteredEvent> context)
     {
         var msg = context.Message;
-        
+
         var account = new Account(
             firstname: msg.Firstname,
             lastname: msg.Lastname,
@@ -39,9 +39,9 @@ public class ProfileRegisteredConsumer : IConsumer<IProfileRegisteredEvent>
 
         if (msg.Role == Roles.Patient)
         {
-            _unitOfWork.Patients.Add(new Patient(msg.KeycloakId) 
-            { 
-                Account = account 
+            _unitOfWork.Patients.Add(new Patient(msg.KeycloakId)
+            {
+                Account = account
             });
         }
         else if (msg.Role == Roles.Doctor && msg.OfficeId.HasValue && msg.SpecializationId.HasValue && msg.CareerStartDate.HasValue)
