@@ -18,14 +18,32 @@ public class RepositoryIntegrationTests
         _fixture.DbContext.ChangeTracker.Clear();
     }
 
+    private Account CreateValidAccount()
+    {
+        var account = DatabaseFixture.CreateEntity<Account>();
+        account.Id = Guid.NewGuid();
+        account.Firstname = "John";
+        account.Lastname = "Doe";
+        account.Email = $"test{Guid.NewGuid()}@domain.com";
+        account.PhoneNumber = $"+12345{Guid.NewGuid().ToString().Substring(0, 5)}";
+        account.PasswordHash = "hash";
+        return account;
+    }
+
+    private Office CreateValidOffice()
+    {
+        var office = DatabaseFixture.CreateEntity<Office>();
+        office.Id = Guid.NewGuid();
+        office.Address = $"Wall Street {Guid.NewGuid().ToString().Substring(0, 5)}";
+        office.PhoneNumber = $"+12345{Guid.NewGuid().ToString().Substring(0, 5)}";
+        return office;
+    }
+
     [Fact]
     public async Task Add_And_GetByIdAsync_ShouldWriteAndReadFromDatabase()
     {
         var repo = new OfficeRepository(_fixture.DbContext);
-        var office = DatabaseFixture.CreateEntity<Office>();
-        office.Id = Guid.NewGuid();
-        office.Address = "Wall Street 1";
-        office.PhoneNumber = "123456789";
+        var office = CreateValidOffice();
 
         repo.Add(office);
         await _fixture.DbContext.SaveChangesAsync();
@@ -33,15 +51,14 @@ public class RepositoryIntegrationTests
         var result = await repo.GetByIdAsync(office.Id);
 
         Assert.NotNull(result);
-        Assert.Equal("Wall Street 1", result.Address);
+        Assert.Equal(office.Address, result.Address);
     }
 
     [Fact]
     public async Task Delete_ShouldRemoveEntityFromDatabase()
     {
         var repo = new OfficeRepository(_fixture.DbContext);
-        var office = DatabaseFixture.CreateEntity<Office>();
-        office.Id = Guid.NewGuid();
+        var office = CreateValidOffice();
 
         repo.Add(office);
         await _fixture.DbContext.SaveChangesAsync();
@@ -57,8 +74,7 @@ public class RepositoryIntegrationTests
     public async Task ExistsAsync_ShouldReturnTrueWhenEntityExists()
     {
         var repo = new OfficeRepository(_fixture.DbContext);
-        var office = DatabaseFixture.CreateEntity<Office>();
-        office.Id = Guid.NewGuid();
+        var office = CreateValidOffice();
         office.Address = "Unique Address";
 
         repo.Add(office);
@@ -76,8 +92,7 @@ public class RepositoryIntegrationTests
 
         for (int i = 0; i < 5; i++)
         {
-            var office = DatabaseFixture.CreateEntity<Office>();
-            office.Id = Guid.NewGuid();
+            var office = CreateValidOffice();
             repo.Add(office);
         }
         await _fixture.DbContext.SaveChangesAsync();
@@ -92,14 +107,13 @@ public class RepositoryIntegrationTests
     public async Task GetByEmail_ShouldReturnCorrectAccount()
     {
         var repo = new AccountRepository(_fixture.DbContext);
-        var account = DatabaseFixture.CreateEntity<Account>();
-        account.Id = Guid.NewGuid();
-        account.Email = "test@domain.com";
+        var account = CreateValidAccount();
+        account.Email = "target@domain.com";
 
         repo.Add(account);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var result = await repo.GetByEmail("test@domain.com");
+        var result = await repo.GetByEmail("target@domain.com");
 
         Assert.NotNull(result);
         Assert.Equal(account.Id, result.Id);
@@ -109,14 +123,13 @@ public class RepositoryIntegrationTests
     public async Task GetByPhoneNumber_ShouldReturnCorrectAccount()
     {
         var repo = new AccountRepository(_fixture.DbContext);
-        var account = DatabaseFixture.CreateEntity<Account>();
-        account.Id = Guid.NewGuid();
-        account.PhoneNumber = "+1234567890";
+        var account = CreateValidAccount();
+        account.PhoneNumber = "+9999999999";
 
         repo.Add(account);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var result = await repo.GetByPhoneNumber("+1234567890");
+        var result = await repo.GetByPhoneNumber("+9999999999");
 
         Assert.NotNull(result);
         Assert.Equal(account.Id, result.Id);
@@ -126,15 +139,14 @@ public class RepositoryIntegrationTests
     public async Task SearchByTerm_ShouldMatchCombinedFirstnameAndLastname()
     {
         var repo = new AccountRepository(_fixture.DbContext);
-        var account = DatabaseFixture.CreateEntity<Account>();
-        account.Id = Guid.NewGuid();
-        account.Firstname = "John";
-        account.Lastname = "Doe";
+        var account = CreateValidAccount();
+        account.Firstname = "James";
+        account.Lastname = "Bond";
 
         repo.Add(account);
         await _fixture.DbContext.SaveChangesAsync();
 
-        var results = await repo.SearchByTerm("John Doe");
+        var results = await repo.SearchByTerm("James Bond");
 
         Assert.Contains(results, a => a.Id == account.Id);
     }
@@ -143,8 +155,7 @@ public class RepositoryIntegrationTests
     public async Task GetByName_ShouldMatchExactFirstOrLastName()
     {
         var repo = new AccountRepository(_fixture.DbContext);
-        var account = DatabaseFixture.CreateEntity<Account>();
-        account.Id = Guid.NewGuid();
+        var account = CreateValidAccount();
         account.Firstname = "Alice";
         account.Lastname = "Smith";
 
@@ -176,8 +187,7 @@ public class RepositoryIntegrationTests
     public async Task GetAllAsync_WithIncludes_ShouldLoadRelatedData()
     {
         var repo = new AccountRepository(_fixture.DbContext);
-        var account = DatabaseFixture.CreateEntity<Account>();
-        account.Id = Guid.NewGuid();
+        var account = CreateValidAccount();
 
         var photo = DatabaseFixture.CreateEntity<Photo>();
         photo.Id = Guid.NewGuid();
