@@ -23,8 +23,8 @@ jobs:
       - name: Verify code formatting
         run: dotnet format ProfilesApi/ProfilesApi.sln --verify-no-changes
 
-  unit-tests:
-    name: Unit Tests
+  build-and-test:
+    name: Build & Test
     runs-on: ubuntu-22.04
     needs: lint
     steps:
@@ -37,34 +37,19 @@ jobs:
           cache-dependency-path: 'ProfilesApi/**/*.csproj'
       - name: Restore dependencies
         run: dotnet restore ProfilesApi/ProfilesApi.sln
-      - name: Build
+      - name: Build Solution
         run: dotnet build ProfilesApi/ProfilesApi.sln --no-restore -c Release
+      
       - name: Run Unit Tests
         run: dotnet test ProfilesApi/ProfilesApi.UnitTests/ProfilesApi.UnitTests.csproj --no-build -c Release --verbosity normal
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-22.04
-    needs: unit-tests
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-          cache: true
-          cache-dependency-path: 'ProfilesApi/**/*.csproj'
-      - name: Restore dependencies
-        run: dotnet restore ProfilesApi/ProfilesApi.sln
-      - name: Build
-        run: dotnet build ProfilesApi/ProfilesApi.sln --no-restore -c Release
+      
       - name: Run Integration Tests
         run: dotnet test ProfilesApi/ProfilesApi.IntegrationTests/ProfilesApi.IntegrationTests.csproj --no-build -c Release --verbosity normal
 
   publish-nuget:
     name: Publish NuGet
     runs-on: ubuntu-22.04
-    needs: integration-tests
+    needs: build-and-test
     permissions:
       id-token: write 
       contents: read
@@ -87,7 +72,7 @@ jobs:
   build-docker:
     name: Build Docker Image
     runs-on: ubuntu-22.04
-    needs: integration-tests
+    needs: build-and-test
     steps:
       - uses: actions/checkout@v4
       - name: Log in to Docker Hub
