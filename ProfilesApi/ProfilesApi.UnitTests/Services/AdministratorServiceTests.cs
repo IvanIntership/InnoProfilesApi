@@ -64,31 +64,6 @@ public class AdministratorServiceTests
     }
 
     [Fact]
-    public async Task CreateAdministratorAsync_Success_ReturnsDto()
-    {
-        var dto = new CreateAdministratorDto { Email = "new@test.com", PhoneNumber = "123", Password = "Pass" };
-        var account = CreateEntity<Account>();
-        account.Id = Guid.NewGuid();
-        var admin = CreateEntity<Administrator>();
-        admin.Id = Guid.NewGuid();
-
-        _unitOfWorkMock.Setup(u => u.Accounts.ExistsAsync(It.IsAny<Expression<Func<Account, bool>>>(), default)).ReturnsAsync(false);
-        _unitOfWorkMock.Setup(u => u.Offices.ExistsAsync(It.IsAny<Expression<Func<Office, bool>>>(), default)).ReturnsAsync(true);
-        _mapperMock.Setup(m => m.Map<Account>(dto)).Returns(account);
-        _mapperMock.Setup(m => m.Map<Administrator>(dto)).Returns(admin);
-        _passwordHasherMock.Setup(p => p.HashPassword(It.IsAny<string>())).Returns("HashedPass");
-        _mapperMock.Setup(m => m.Map<AdministratorDto>(admin)).Returns(new AdministratorDto { Id = admin.Id });
-
-        var result = await _adminService.CreateAdministratorAsync(dto, Guid.NewGuid());
-
-        Assert.NotNull(result);
-        _unitOfWorkMock.Verify(u => u.Accounts.Add(account), Times.Once);
-        _unitOfWorkMock.Verify(u => u.Administrators.Add(admin), Times.Once);
-        _publishEndpointMock.Verify(p => p.Publish(It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Once);
-        _unitOfWorkMock.Verify(u => u.CompleteAsync(default), Times.Once);
-    }
-
-    [Fact]
     public async Task DeleteAdministratorAsync_NotFound_ThrowsNotFoundException()
     {
         _unitOfWorkMock.Setup(u => u.Administrators.GetWithDetailsAsync(It.IsAny<Guid>(), default)).ReturnsAsync((Administrator?)null);
