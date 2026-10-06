@@ -8,12 +8,12 @@ on:
 
 env:
   DOTNET_VERSION: '10.0.x'
-  NUGET_PROJECT_PATH: 'ProfilesApi.Application/ProfilesApi.Application.csproj'
+  NUGET_PROJECT_PATH: 'ProfilesApi/ProfilesApi.Application/ProfilesApi.Application.csproj'
 
 jobs:
   lint:
     name: Code Linter
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
@@ -21,11 +21,11 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
       - name: Verify code formatting
-        run: dotnet format --verify-no-changes
+        run: dotnet format ProfilesApi/ProfilesApi.sln --verify-no-changes
 
   build-and-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: lint
     steps:
       - uses: actions/checkout@v4
@@ -35,15 +35,15 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
           cache: true
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore ProfilesApi/ProfilesApi.sln
       - name: Build
-        run: dotnet build --no-restore -c Release
+        run: dotnet build ProfilesApi/ProfilesApi.sln --no-restore -c Release
       - name: Run Tests
-        run: dotnet test --no-build -c Release --verbosity normal
+        run: dotnet test ProfilesApi/ProfilesApi.sln --no-build -c Release --verbosity normal
 
   publish-nuget:
     name: Publish NuGet
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-and-test
     permissions:
       id-token: write 
@@ -58,9 +58,10 @@ jobs:
         run: dotnet pack ${{ env.NUGET_PROJECT_PATH }} -c Release -o ./out
       - name: Push to NuGet
         run: dotnet nuget push ./out/*.nupkg --source https://api.nuget.org/v3/index.json --skip-duplicate
+
   build-docker:
     name: Build Docker Image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-and-test
     steps:
       - uses: actions/checkout@v4
@@ -72,6 +73,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./ProfilesApi
           push: true
-          tags: mydockerhubuser/profiles-api:latest, mydockerhubuser/profiles-api:${{ github.sha }}
+          tags: lapivan/profiles-api:latest, lapivan/profiles-api:${{ github.sha }}
