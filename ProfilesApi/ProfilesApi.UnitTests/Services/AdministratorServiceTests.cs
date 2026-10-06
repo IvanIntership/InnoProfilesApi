@@ -1,9 +1,8 @@
 using System.Linq.Expressions;
 using AutoMapper;
-using MassTransit;
 using Microsoft.Extensions.Logging;
 using Moq;
-using ProfilesApi.Application.Dto.Administrators;
+using ProfilesApi.Application.Dto.Offices;
 using ProfilesApi.Application.Interfaces;
 using ProfilesApi.Application.Services;
 using ProfilesApi.Domain.Entities;
@@ -12,127 +11,149 @@ using Xunit;
 
 namespace ProfilesApi.UnitTests.Services;
 
-public class AdministratorServiceTests
+public class OfficeServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IMapper> _mapperMock;
-    private readonly Mock<IPasswordHasher> _passwordHasherMock;
-    private readonly Mock<ILogger<AdministratorService>> _loggerMock;
-    private readonly Mock<IPublishEndpoint> _publishEndpointMock;
-    private readonly AdministratorService _adminService;
+    private readonly Mock<ILogger<OfficeService>> _loggerMock;
+    private readonly OfficeService _officeService;
 
-    public AdministratorServiceTests()
+    public OfficeServiceTests()
     {
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _mapperMock = new Mock<IMapper>();
-        _passwordHasherMock = new Mock<IPasswordHasher>();
-        _loggerMock = new Mock<ILogger<AdministratorService>>();
-        _publishEndpointMock = new Mock<IPublishEndpoint>();
+        _loggerMock = new Mock<ILogger<OfficeService>>();
+        
+        _officeService = new OfficeService(_mapperMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
+    }
 
-        _adminService = new AdministratorService(
-            _mapperMock.Object,
-            _unitOfWorkMock.Object,
-            _passwordHasherMock.Object,
-            _loggerMock.Object,
-            _publishEndpointMock.Object);
+    private static T CreateEntity<T>() where T : class
+    {
+        return (T)Activator.CreateInstance(typeof(T), nonPublic: true)!;
     }
 
     [Fact]
-    public async Task CreateAdministratorAsync_EmailExists_ThrowsConflictException()
+    public async Task CreateOfficeAsync_Success_ReturnsOfficeDto()
     {
-        var dto = new CreateAdministratorDto { Email = "test@test.com" };
-        _unitOfWorkMock.Setup(u => u.Accounts.ExistsAsync(It.IsAny<Expression<Func<Account, bool>>>(), default))
-                       .ReturnsAsync((Expression<Func<Account, bool>> expr, CancellationToken ct) =>
-                           expr.Compile().Invoke(new Account { Email = "test@test.com" }));
+        // Arrange
+        var dto = new CreateOfficeDto { Address = "Test", PhoneNumber = "123" };
+        var office = CreateEntity<Office>();
+        office.Id = Guid.NewGuid();
+        
+        var officeDto = new OfficeDto { Id = office.Id, Address = "Test" };
 
-        await Assert.ThrowsAsync<ConflictException>(() => _adminService.CreateAdministratorAsync(dto, Guid.NewGuid()));
-    }
-
-    [Fact]
-    public async Task CreateAdministratorAsync_OfficeNotFound_ThrowsNotFoundException()
-    {
-        var dto = new CreateAdministratorDto { Email = "new@test.com", PhoneNumber = "123", OfficeId = Guid.NewGuid() };
-        _unitOfWorkMock.Setup(u => u.Accounts.ExistsAsync(It.IsAny<Expression<Func<Account, bool>>>(), default)).ReturnsAsync(false);
+        _mapperMock.Setup(m => m.Map<Office>(dto)).Returns(office);
         _unitOfWorkMock.Setup(u => u.Offices.ExistsAsync(It.IsAny<Expression<Func<Office, bool>>>(), default)).ReturnsAsync(false);
+        _mapperMock.Setup(m => m.Map<OfficeDto>(office)).Returns(officeDto);
 
-        await Assert.ThrowsAsync<NotFoundException>(() => _adminService.CreateAdministratorAsync(dto, Guid.NewGuid()));
-    }
+        // Act
+        var result = await _officeService.CreateOfficeAsync(dto);
 
-    [Fact]
-    public async Task CreateAdministratorAsync_Success_ReturnsDto()
-    {
-        var dto = new CreateAdministratorDto { Email = "new@test.com", PhoneNumber = "123", Password = "Pass" };
-        var account = new Account { Id = Guid.NewGuid() };
-        var admin = new Administrator { Id = Guid.NewGuid() };
-
-        _unitOfWorkMock.Setup(u => u.Accounts.ExistsAsync(It.IsAny<Expression<Func<Account, bool>>>(), default)).ReturnsAsync(false);
-        _unitOfWorkMock.Setup(u => u.Offices.ExistsAsync(It.IsAny<Expression<Func<Office, bool>>>(), default)).ReturnsAsync(true);
-        _mapperMock.Setup(m => m.Map<Account>(dto)).Returns(account);
-        _mapperMock.Setup(m => m.Map<Administrator>(dto)).Returns(admin);
-        _passwordHasherMock.Setup(p => p.HashPassword(It.IsAny<string>())).Returns("HashedPass");
-        _mapperMock.Setup(m => m.Map<AdministratorDto>(admin)).Returns(new AdministratorDto { Id = admin.Id });
-
-        var result = await _adminService.CreateAdministratorAsync(dto, Guid.NewGuid());
-
+        // Assert
         Assert.NotNull(result);
-        _unitOfWorkMock.Verify(u => u.Accounts.Add(account), Times.Once);
-        _unitOfWorkMock.Verify(u => u.Administrators.Add(admin), Times.Once);
-        _publishEndpointMock.Verify(p => p.Publish(It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Equal(office.Id, result.Id);
+        _unitOfWorkMock.Verify(u => u.Offices.Add(office), Times.Once);
         _unitOfWorkMock.Verify(u => u.CompleteAsync(default), Times.Once);
     }
 
     [Fact]
-    public async Task DeleteAdministratorAsync_NotFound_ThrowsNotFoundException()
+    public async Task CreateOfficeAsync_AlreadyExists_ThrowsConflictException()
     {
-        _unitOfWorkMock.Setup(u => u.Administrators.GetWithDetailsAsync(It.IsAny<Guid>(), default)).ReturnsAsync((Administrator?)null);
+        // Arrange
+        var dto = new CreateOfficeDto { Address = "Test", PhoneNumber = "123" };
+        _mapperMock.Setup(m => m.Map<Office>(dto)).Returns(CreateEntity<Office>());
+        _unitOfWorkMock.Setup(u => u.Offices.ExistsAsync(It.IsAny<Expression<Func<Office, bool>>>(), default)).ReturnsAsync(true);
 
-        await Assert.ThrowsAsync<NotFoundException>(() => _adminService.DeleteAdministratorAsync(Guid.NewGuid()));
+        // Act & Assert
+        await Assert.ThrowsAsync<ConflictException>(() => _officeService.CreateOfficeAsync(dto));
     }
 
     [Fact]
-    public async Task DeleteAdministratorAsync_LastAdmin_ThrowsConflictException()
+    public async Task GetOfficeByIdAsync_Success_ReturnsOfficeDto()
     {
+        // Arrange
         var id = Guid.NewGuid();
-        _unitOfWorkMock.Setup(u => u.Administrators.GetWithDetailsAsync(id, default)).ReturnsAsync(new Administrator { Id = id });
-        _unitOfWorkMock.Setup(u => u.Administrators.ExistsAsync(It.IsAny<Expression<Func<Administrator, bool>>>(), default)).ReturnsAsync(false);
+        var office = CreateEntity<Office>();
+        office.Id = id;
+        var officeDto = new OfficeDto { Id = id };
 
-        await Assert.ThrowsAsync<ConflictException>(() => _adminService.DeleteAdministratorAsync(id));
-    }
+        _unitOfWorkMock.Setup(u => u.Offices.GetByIdAsync(id, default)).ReturnsAsync(office);
+        _mapperMock.Setup(m => m.Map<OfficeDto>(office)).Returns(officeDto);
 
-    [Fact]
-    public async Task DeleteAdministratorAsync_Success_DeletesAdminAndAccount()
-    {
-        var id = Guid.NewGuid();
-        var admin = new Administrator { Id = id, Account = new Account() };
-        _unitOfWorkMock.Setup(u => u.Administrators.GetWithDetailsAsync(id, default)).ReturnsAsync(admin);
-        _unitOfWorkMock.Setup(u => u.Administrators.ExistsAsync(It.IsAny<Expression<Func<Administrator, bool>>>(), default)).ReturnsAsync(true);
+        // Act
+        var result = await _officeService.GetOfficeByIdAsync(id);
 
-        await _adminService.DeleteAdministratorAsync(id);
-
-        _unitOfWorkMock.Verify(u => u.Administrators.Delete(admin), Times.Once);
-        _unitOfWorkMock.Verify(u => u.Accounts.Delete(admin.Account), Times.Once);
-        _unitOfWorkMock.Verify(u => u.CompleteAsync(default), Times.Once);
-    }
-
-    [Fact]
-    public async Task GetAdministratorAsync_NotFound_ThrowsNotFoundException()
-    {
-        _unitOfWorkMock.Setup(u => u.Administrators.GetWithDetailsAsync(It.IsAny<Guid>(), default)).ReturnsAsync((Administrator?)null);
-
-        await Assert.ThrowsAsync<NotFoundException>(() => _adminService.GetAdministratorAsync(Guid.NewGuid()));
-    }
-
-    [Fact]
-    public async Task GetAdministratorAsync_Success_ReturnsDto()
-    {
-        var id = Guid.NewGuid();
-        var admin = new Administrator { Id = id };
-        _unitOfWorkMock.Setup(u => u.Administrators.GetWithDetailsAsync(id, default)).ReturnsAsync(admin);
-        _mapperMock.Setup(m => m.Map<AdministratorDto>(admin)).Returns(new AdministratorDto { Id = id });
-
-        var result = await _adminService.GetAdministratorAsync(id);
-
+        // Assert
         Assert.NotNull(result);
         Assert.Equal(id, result.Id);
+    }
+
+    [Fact]
+    public async Task GetOfficeByIdAsync_NotFound_ThrowsConflictException()
+    {
+        // Arrange
+        _unitOfWorkMock.Setup(u => u.Offices.GetByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync((Office?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ConflictException>(() => _officeService.GetOfficeByIdAsync(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task DeleteOfficeAsync_Success_DeletesOffice()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var office = CreateEntity<Office>();
+        office.Id = id;
+
+        _unitOfWorkMock.Setup(u => u.Offices.GetByIdAsync(id, default)).ReturnsAsync(office);
+        _unitOfWorkMock.Setup(u => u.Doctors.ExistsAsync(It.IsAny<Expression<Func<Doctor, bool>>>(), default)).ReturnsAsync(false);
+        _unitOfWorkMock.Setup(u => u.Administrators.ExistsAsync(It.IsAny<Expression<Func<Administrator, bool>>>(), default)).ReturnsAsync(false);
+
+        // Act
+        await _officeService.DeleteOfficeAsync(id);
+
+        // Assert
+        _unitOfWorkMock.Verify(u => u.Offices.Delete(office), Times.Once);
+        _unitOfWorkMock.Verify(u => u.CompleteAsync(default), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteOfficeAsync_NotFound_ThrowsNotFoundException()
+    {
+        // Arrange
+        _unitOfWorkMock.Setup(u => u.Offices.GetByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync((Office?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(() => _officeService.DeleteOfficeAsync(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task DeleteOfficeAsync_HasAssignedDoctors_ThrowsConflictException()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var office = CreateEntity<Office>();
+        office.Id = id;
+        _unitOfWorkMock.Setup(u => u.Offices.GetByIdAsync(id, default)).ReturnsAsync(office);
+        _unitOfWorkMock.Setup(u => u.Doctors.ExistsAsync(It.IsAny<Expression<Func<Doctor, bool>>>(), default)).ReturnsAsync(true);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ConflictException>(() => _officeService.DeleteOfficeAsync(id));
+    }
+    
+    [Fact]
+    public async Task DeleteOfficeAsync_HasAssignedAdmins_ThrowsConflictException()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var office = CreateEntity<Office>();
+        office.Id = id;
+        _unitOfWorkMock.Setup(u => u.Offices.GetByIdAsync(id, default)).ReturnsAsync(office);
+        _unitOfWorkMock.Setup(u => u.Doctors.ExistsAsync(It.IsAny<Expression<Func<Doctor, bool>>>(), default)).ReturnsAsync(false);
+        _unitOfWorkMock.Setup(u => u.Administrators.ExistsAsync(It.IsAny<Expression<Func<Administrator, bool>>>(), default)).ReturnsAsync(true);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ConflictException>(() => _officeService.DeleteOfficeAsync(id));
     }
 }
