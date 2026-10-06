@@ -28,12 +28,12 @@ public class AdministratorServiceTests
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _loggerMock = new Mock<ILogger<AdministratorService>>();
         _publishEndpointMock = new Mock<IPublishEndpoint>();
-        
+
         _adminService = new AdministratorService(
-            _mapperMock.Object, 
-            _unitOfWorkMock.Object, 
-            _passwordHasherMock.Object, 
-            _loggerMock.Object, 
+            _mapperMock.Object,
+            _unitOfWorkMock.Object,
+            _passwordHasherMock.Object,
+            _loggerMock.Object,
             _publishEndpointMock.Object);
     }
 
@@ -42,7 +42,7 @@ public class AdministratorServiceTests
     {
         var dto = new CreateAdministratorDto { Email = "test@test.com" };
         _unitOfWorkMock.Setup(u => u.Accounts.ExistsAsync(It.IsAny<Expression<Func<Account, bool>>>(), default))
-                       .ReturnsAsync((Expression<Func<Account, bool>> expr, CancellationToken ct) => 
+                       .ReturnsAsync((Expression<Func<Account, bool>> expr, CancellationToken ct) =>
                            expr.Compile().Invoke(new Account { Email = "test@test.com" }));
 
         await Assert.ThrowsAsync<ConflictException>(() => _adminService.CreateAdministratorAsync(dto, Guid.NewGuid()));
@@ -64,7 +64,7 @@ public class AdministratorServiceTests
         var dto = new CreateAdministratorDto { Email = "new@test.com", PhoneNumber = "123", Password = "Pass" };
         var account = new Account { Id = Guid.NewGuid() };
         var admin = new Administrator { Id = Guid.NewGuid() };
-        
+
         _unitOfWorkMock.Setup(u => u.Accounts.ExistsAsync(It.IsAny<Expression<Func<Account, bool>>>(), default)).ReturnsAsync(false);
         _unitOfWorkMock.Setup(u => u.Offices.ExistsAsync(It.IsAny<Expression<Func<Office, bool>>>(), default)).ReturnsAsync(true);
         _mapperMock.Setup(m => m.Map<Account>(dto)).Returns(account);

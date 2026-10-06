@@ -23,7 +23,7 @@ public class OfficeServiceTests
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _mapperMock = new Mock<IMapper>();
         _loggerMock = new Mock<ILogger<OfficeService>>();
-        
+
         _officeService = new OfficeService(_mapperMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
     }
 
@@ -113,7 +113,7 @@ public class OfficeServiceTests
 
         await Assert.ThrowsAsync<ConflictException>(() => _officeService.DeleteOfficeAsync(id));
     }
-    
+
     [Fact]
     public async Task DeleteOfficeAsync_HasAssignedAdmins_ThrowsConflictException()
     {
