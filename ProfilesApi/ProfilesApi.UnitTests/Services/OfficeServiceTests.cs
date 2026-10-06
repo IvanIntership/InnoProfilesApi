@@ -28,12 +28,12 @@ public class AdministratorServiceTests
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _loggerMock = new Mock<ILogger<AdministratorService>>();
         _publishEndpointMock = new Mock<IPublishEndpoint>();
-        
+
         _adminService = new AdministratorService(
-            _mapperMock.Object, 
-            _unitOfWorkMock.Object, 
-            _passwordHasherMock.Object, 
-            _loggerMock.Object, 
+            _mapperMock.Object,
+            _unitOfWorkMock.Object,
+            _passwordHasherMock.Object,
+            _loggerMock.Object,
             _publishEndpointMock.Object);
     }
 
@@ -47,9 +47,9 @@ public class AdministratorServiceTests
     {
         // Arrange
         var dto = new CreateAdministratorDto { Email = "test@test.com" };
-        
+
         _unitOfWorkMock.Setup(u => u.Accounts.ExistsAsync(It.IsAny<Expression<Func<Account, bool>>>(), default))
-                       .ReturnsAsync(true); 
+                       .ReturnsAsync(true);
 
         // Act & Assert
         await Assert.ThrowsAsync<ConflictException>(() => _adminService.CreateAdministratorAsync(dto, Guid.NewGuid()));
@@ -76,7 +76,7 @@ public class AdministratorServiceTests
         account.Id = Guid.NewGuid();
         var admin = CreateEntity<Administrator>();
         admin.Id = Guid.NewGuid();
-        
+
         _unitOfWorkMock.Setup(u => u.Accounts.ExistsAsync(It.IsAny<Expression<Func<Account, bool>>>(), default)).ReturnsAsync(false);
         _unitOfWorkMock.Setup(u => u.Offices.ExistsAsync(It.IsAny<Expression<Func<Office, bool>>>(), default)).ReturnsAsync(true);
         _mapperMock.Setup(m => m.Map<Account>(dto)).Returns(account);
@@ -127,7 +127,7 @@ public class AdministratorServiceTests
         var admin = CreateEntity<Administrator>();
         admin.Id = id;
         admin.Account = CreateEntity<Account>();
-        
+
         _unitOfWorkMock.Setup(u => u.Administrators.GetWithDetailsAsync(id, default)).ReturnsAsync(admin);
         _unitOfWorkMock.Setup(u => u.Administrators.ExistsAsync(It.IsAny<Expression<Func<Administrator, bool>>>(), default)).ReturnsAsync(true);
 

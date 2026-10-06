@@ -23,7 +23,7 @@ public class OfficeServiceTests
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _mapperMock = new Mock<IMapper>();
         _loggerMock = new Mock<ILogger<OfficeService>>();
-        
+
         _officeService = new OfficeService(_mapperMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
     }
 
@@ -39,7 +39,7 @@ public class OfficeServiceTests
         var dto = new CreateOfficeDto { Address = "Test", PhoneNumber = "123" };
         var office = CreateEntity<Office>();
         office.Id = Guid.NewGuid();
-        
+
         var officeDto = new OfficeDto { Id = office.Id, Address = "Test" };
 
         _mapperMock.Setup(m => m.Map<Office>(dto)).Returns(office);
@@ -141,7 +141,7 @@ public class OfficeServiceTests
         // Act & Assert
         await Assert.ThrowsAsync<ConflictException>(() => _officeService.DeleteOfficeAsync(id));
     }
-    
+
     [Fact]
     public async Task DeleteOfficeAsync_HasAssignedAdmins_ThrowsConflictException()
     {
